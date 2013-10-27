@@ -1,0 +1,14 @@
+#include "vehicule4.h"
+class VehiculeVolant : public virtual Vehicule
+{
+	public:
+		VehiculeVolant();
+		~VehiculeVolant();
+
+		void setMaxAltitude(int maxAltitude);
+		int getMaxAltitude();
+		void description();
+
+	private:
+		int m_MaxAltitude;		
+}

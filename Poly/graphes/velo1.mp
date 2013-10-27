@@ -1,0 +1,23 @@
+input metauml;
+beginfig(1);
+	Class.A("Velo")
+		("-m_etat : int", 
+		 "-m_antivol : bool", 
+		 "-m_couleur : int", 
+		 "-m_prix : int")
+		("+getEtat() : int", 
+		 "+setEtat(int etat) : void",
+  		 "+aUnAntivol() : bool", 
+		 "+aUnAntivol(bool antivol) : void",
+		 "+getCouleur() : int", 
+		 "+setCouleur(int fuel) : void",
+  		 "+getPrix() : int", 
+		 "+setPrix(int fuel) : void",
+  		 "+description() : void ");
+
+
+	A.nw = (0, 0); % optional, implied
+	drawObject(A);
+endfig;
+end
+

@@ -1,0 +1,20 @@
+#include "complexe2.h"
+
+
+Complexe::Complexe(double rho, double theta):rho(rho), theta(theta)
+{
+}
+
+Complexe::~Complexe()
+{
+}
+
+double Complexe::module()
+{
+    return rho;
+}
+
+double Complexe::argument()
+{
+    return theta;
+}

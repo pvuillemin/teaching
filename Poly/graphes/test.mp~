@@ -1,0 +1,15 @@
+input metauml;
+
+beginfig(1);
+	
+	Class.C("Object")("+id:int")
+	("+clone()", "+serialize()");
+	
+	
+	drawObject(C)
+
+	
+endfig;
+end
+
+

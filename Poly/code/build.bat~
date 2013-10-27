@@ -1,0 +1,82 @@
+@echo off
+rem Script de build sous windows/VC++
+cl calculecarres.cpp
+if errorlevel 1 goto end
+
+cl DevineUnNombre.cpp
+if errorlevel 1 goto end
+
+cl incrementevaleurerreur.cpp
+if errorlevel 1 goto end
+
+cl incrementevaleurreference.cpp
+if errorlevel 1 goto end
+
+cl newdelete.cpp
+if errorlevel 1 goto end
+
+cl vecteurtableaux.cpp
+if errorlevel 1 goto end
+
+cl vecteurstructure.cpp /GX
+if errorlevel 1 goto end
+
+cl main_vecteur1.cpp vecteur1.cpp
+if errorlevel 1 goto end
+
+cl main_vecteur2.cpp vecteur2.cpp
+if errorlevel 1 goto end
+
+cl main_vecteur3.cpp vecteur3.cpp
+if errorlevel 1 goto end
+
+cl complexe.cpp main_complexe.cpp
+if errorlevel 1 goto end
+
+cl complexe2.cpp main_complexe2.cpp
+if errorlevel 1 goto end
+
+cl complexe3.cpp main_complexe3.cpp
+if errorlevel 1 goto end
+
+cl complexe4.cpp main_complexe4.cpp
+if errorlevel 1 goto end
+
+cl complexe5.cpp main_complexe5.cpp
+if errorlevel 1 goto end
+
+cl complexe6.cpp main_complexe6.cpp
+if errorlevel 1 goto end
+
+cl complexe7.cpp main_complexe7.cpp
+if errorlevel 1 goto end
+
+cl complexe8.cpp main_complexe8.cpp
+if errorlevel 1 goto end
+
+cl complexe9.cpp main_complexe9.cpp
+if errorlevel 1 goto end
+
+cl complexe10.cpp main_complexe10.cpp
+if errorlevel 1 goto end
+
+rem cl main_vehicules1.cpp voiture1.cpp velo1.cpp
+rem if errorlevel 1 goto end
+cl surchargeConstructeur.cpp surchargeConstructeurMain.cpp
+if errorlevel 1 goto end
+
+cl main_vehicules2.cpp vehicule2.cpp voiture2.cpp velo2.cpp /GX
+if errorlevel 1 goto end
+
+cl main_vehicules3.cpp vehicule3.cpp voiture3.cpp velo3.cpp /GX
+if errorlevel 1 goto end
+
+echo Build Complete.
+goto goodend
+
+:end
+echo Error Building source.
+
+:goodend
+rem generation des sorties
+main_vehicules2 >main_vehicules2.out

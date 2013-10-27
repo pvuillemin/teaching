@@ -1,0 +1,608 @@
+\chapter{H\'eritage}
+
+
+
+Nous allons \`a pr\'esent aborder l'apport fondamental du C++ (et des langages
+objets) par rapport aux langages proc\'eduraux classiques (C), \`a savoir
+l'h\'eritage. Cette notion va nous montrer une nouvelle fois comment r\'eutiliser du code d\'ej\`a \'ecrit.
+
+\section{Une petite histoire}
+
+Consid\'erons un programmeur (que nous appellerons Eric) dans une soci\'et\'e
+de location de v\'elos et de voitures, \`a qui l'on a demand\'e d'\'ecrire un
+programme pour g\'erer l'ensemble des v\'ehicules. Eric commence par \'ecrire
+une classe d\'ecrivant une voiture :
+
+\includecode{voiture1.h}
+
+et continue avec la classe v\'elo :
+
+\includecode{velo1.h}
+
+Eric \'etant prudent, il utilise les m\^emes noms de variables afin
+de ne pas perturber l'utilisateur. Il d\'ecide alors d'\'ecrire une fonction
+affichant les descriptions des v\'ehicules :
+
+\includecodecaption{main_vehicules1.cpp}{main\_vehicules1.cpp}
+
+
+%\begin{figure}
+%	\begin{center}
+%		\begin{tabular}{c c }
+%		\includegraphics{../../graphes/velo1.1} &
+%		\includegraphics{../../graphes/voiture1.1} \\			
+%		\end{tabular}
+%
+%	\end{center}
+%	\caption{La classe \classname{Velo} et la classe \classname{Voiture}.}
+%	\label{fig:velovoiture}
+%\end{figure}
+
+Eric fait alors les remarques suivantes :
+\begin{itemize}
+
+	\item Les v\'elos et les voitures sont tous deux des v\'ehicules et
+		partagent de nombreuses caract\'eristiques (prix, couleur,
+		\'etat), mais ont malgr\'e cela quelques diff\'erences.
+
+	\item Si son entreprise se met a louer d'autres v\'ehicules (des motos,
+		par exemple), il va devoir cr\'eer une nouvelle classe presque
+		identique aux pr\'ec\'edentes. Il devra \'egalement modifier sa
+		fonction \functionname{description}.
+
+\end{itemize}
+
+Dans la mesure o\`u v\'elos et voitures sont tous deux des v\'ehicules, ne
+serait-il pas possible de d\'efinir un objet \texttt{vehicule}, et de les
+sp\'ecialiser en n'expliquant que leurs diff\'erences en v\'elos et voitures?
+Cela permettrait de simplifier et raccourcir le code,  et d'augmenter sa
+lisibilit\'e. Il serait \'egalement plus facilement extensible et maintenable.
+Ceci est possible au moyen de ce que l'on appelle \emph{l'h\'eritage}.
+
+\section{H\'eritage simple}
+L'id\'ee est la suivante : nous allons d\'efinir une classe de v\'ehicule, et la
+sp\'ecialiser (ce qu'on appelle \emph{d\'eriver} la classe \emph{m\`ere} - ici
+la classe \texttt{vehicule}- en des classes \emph{filles}), \texttt{velo} et
+\texttt{voiture} ne contenant que les diff\'erences. On dira que les classes
+\texttt{velo} et \texttt{voiture} h\'eritent de la classe m\`ere
+\texttt{voiture}. L'h\'eritage permet d'\'ecrire une relation du type ``est
+un'', puisqu'un v\'elo et une voiture sont des v\'ehicules.\\
+
+D'un point de vue syntaxique, la d\'eclaration d'une classe d\'eriv\'ee est
+tr\`es simple. Il y a trois possibilit\'es :\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+/*premiere possibilite*/
+class Fille : public class Mere
+{
+    /*nouveaux membres*/
+};
+/*seconde possibilite*/
+class Fille : protected class Mere
+{
+    /*nouveaux membres*/
+};
+/*troisieme possibilite*/
+class Fille : private class Mere
+{
+    /*nouveaux membres*/
+};
+
+\end{lstlisting}
+\end{DDbox}
+
+Le lecteur attentif aura remarqu\'e l'emploi des mots public, protected, ou
+private. Dans un premier temps, nous n'utiliserons que la forme
+\texttt{public}, et reviendrons dans la section \ref{sec:heritagevisibilite}
+sur leur signification.\\
+
+En pratique, notre code devient le suivant :\\
+
+\includecode{vehicule2.h}
+
+Nous avons donc rang\'e tous les attributs communs d'un v\'ehicule dans une
+classe habilement nomm\'ee \texttt{vehicule}. La fonction
+\functionname{description} est laiss\'ee \`a l'ext\'erieur, comme un
+attribut non commun des v\'ehicules, dans la mesure o\`u suivant l'objet
+consid\'er\'e (un \classname{velo} ou une \classname{voiture}), elle
+n'affichera pas la m\^eme chose. Que deviennent alors \texttt{Velo } et
+\texttt{voiture} ? Le r\'esultat est visible ci-dessous :
+
+\includecode{voiture2.h}
+\includecode{velo2.h}
+
+Le code de la classe \classname{Voiture} (par exemple) s'\'ecrit alors :
+
+\includecode{voiture2.cpp}
+
+Comme nous pouvons le constater, le code des nouvelles classes
+\texttt{Voiture} et \text{Velo} est nettement plus court. En effet, nous
+n'avons pas besoin de red\'eclarer la plupart des fonctions, car elles sont
+automatiquement \emph{h\'erit\'ees} de la classe m\`ere v\'ehicule.  En
+particulier, la fonction \functionname{description} fait appel au membre
+\varname{m\_prix} de la classe m\`ere \classname{Vehicule}.  Cela signifie
+\'egalement que l'on peut appeler les m\'ethodes de la classe
+\texttt{vehicule} depuis un objet \texttt{Velo} ou \texttt{Voiture}. Par
+exemple, le code-ci dessous fonctionnera correctement:\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+Velo v;
+
+cout << v.getPrix();
+\end{lstlisting}
+\end{DDbox}
+
+Il y a cependant un l\'eger probl\`eme, en particulier en ce qui concerne la m\'ethode \functionname{description}. En effet, si l'on compile le code pr\'esent\'e, le compilateur va nous donner une erreur :\\
+
+\texttt{'m\_prix' : cannot access private member declared in class 'Vehicule'}\\
+
+Que signifie cette erreur? L'origine de notre probl\`eme est que nous avons suppos\'e que nous avions acc\`es dans nos classes d\'eriv\'ees aux membres priv\'es de la classe m\`ere. Ce n'est pas le cas, et nous allons passer en revue ce probl\`eme de droit d'acc\`es dans la section suivante.
+
+\section{Encapsulation : le retour}
+
+Lors de notre introduction \`a l'encapsulation, nous avions vu deux mots
+cl\'es : \keyword{private} et \keyword{public}. \keyword{private} servait \`a
+interdire au reste du monde d'acc\'eder \`a certains membres, et
+\keyword{public} servait \`a autoriser le reste du monde \`a acc\'eder \`a
+certains membres. Cependant, que se passe-t-il lorsque une classe h\'erite
+d'une autre?
+
+Nous avons, dans le cadre vu jusqu'\`a pr\'esent (h\'eritage \`a l'aide de \keyword{public}), le comportement suivant :
+
+\begin{itemize}
+	\item Les membres \keyword{private} de la classe m\`ere ne sont \emph{pas} accessibles \`a la classe d\'eriv\'ee.
+	\item Les membres \keyword{public} de la classe m\`ere sont accessibles \`a la classe d\'eriv\'ee.	
+\end{itemize}
+
+Cependant, on peut souhaiter un niveau interm\'ediaire : accessible \`a la classe m\`ere, \`a la classe d\'eriv\'ee, mais \emph{pas} au reste du monde (ce qui \'etait le but initial de \keyword{private}). C'est le but du mot cl\'e \keyword{protected}.
+
+L'ensemble de ces r\`egles d'h\'eritage est r\'esum\'e tableau \ref{tab:encapsulationvisibilite}.
+
+\begin{table}
+	\centering
+	\begin{tabular}{l|l|l|l}
+	Acc\`es	& public & protected & private\\
+	\hline
+	Membres de la classe & Oui & Oui & Oui \\
+	\hline
+	Membres des classes d\'eriv\'ees & Oui & Oui & Non\\
+	\hline
+	Reste du monde & Oui & Non & Non\\
+	\hline
+	\end{tabular}
+	\caption{Encapsulation : diff\'erents degr\'es de visibilit\'e}
+	\label{tab:encapsulationvisibilite}
+\end{table}
+
+Pour que nos classes d\'eriv\'ees aient acc\`es au membre \varname{m\_prix}, nous avons donc deux possibilit\'es :
+
+\begin{itemize}
+	\item  Utiliser l'accesseur \functionname{getprix};
+	\item  Mettre \varname{m\_prix} en \keyword{protected}.
+\end{itemize}
+
+Nous allons retenir la seconde solution, et notre classe \classname{Vehicule} s'\'ecrira alors:
+
+\includecode{vehicule3.h}
+
+Le code des autres classes sera alors inchang\'e.
+
+
+Eric a donc organis\'e son code de mani\`ere beaucoup plus rationnelle et donc
+plus maintenable. Cependant, il souhaiterait tirer parti du fait
+qu'il peut \`a pr\'esent manipuler des \classname{Vehicule} de mani\`ere
+g\'en\'erique, puisque :
+
+\begin{itemize}
+	\item Il a d\'efini une classe  \classname{Vehicule}.
+	\item \classname{Velo} et \classname{Voiture} ont tous deux une m\'ethode \functionname{description}.
+\end{itemize}
+
+
+Il d\'ecide donc de modifier le code de sa fonction d'affichage des descriptions (voir listing \ref{lst:main_vehicule1.cpp}) et de le remplacer par le suivant :
+
+\includecodecaption{main_vehicules3.cpp}{main\_vehicules3.cpp}
+
+Il se dit alors que si le directeur de la compagnie - qui est en plein
+d\'eveloppement - d\'ecide de louer des motos, ce code restera inchang\'e.  Un nouveau probl\`eme surgit alors, lors de la compilation :
+
+\texttt{'description' is not a member of 'Vehicule'}
+
+En effet, si \classname{Velo} et \classname{Voiture} ont tous deux une m\'ethode \functionname{description}, ce n'est pas le cas de \classname{Vehicule}. Il faut donc la rajouter, ce qui nous donne le header suivant:
+
+\includecode{vehicule4.h}
+
+Il est important de noter qu'au final, nous avons \emph{surcharg\'e} dans les classes
+d\'eriv\'ees la m\'ethode \functionname{description} d\'efinie dans la classe
+m\`ere \classname{Vehicule}.
+
+
+Cette modification faite, il tente de r\'eutiliser le code du listing \ref{lst:main_vehicule3.cpp}.Ce code ne fait malheureusement  pas ce qui est attendu.  Pour \^etre pr\'ecis, si on l'ex\'ecute, on obtient:
+
+\verbatiminput{code/main_vehicules4.out}
+
+Ce probl\`eme sera r\'esolu dans la section suivante, par l'emploi de fonctions virtuelles.
+
+
+\section{Fonctions virtuelles}
+
+Pour r\'esoudre le probl\`eme du listing \ref{lst:main_vehicules3.cpp},
+il nous faut
+
+\begin{itemize}
+	\item Comprendre l'origine du probl\`eme;
+	\item Trouver un moyen de le r\'esoudre.
+\end{itemize}
+
+L'origine du probl\`eme est relativement simple. L'id\'ee est la suivante :
+\`a la compilation, le compilateur C++ assigne une adresse fixe en m\'emoire
+aux m\'ethodes de chaque objet. Dans notre cas, il assignera trois adresses,
+une pour \functionname{Vehicule.description}, une pour
+\functionname{Voiture.description}, et une pour
+\functionname{Velo.description}. Cette op\'eration est effectu\'ee une et une
+seule fois, \emph{\`a la compilation}. La cons\'equence directe est que la
+ligne
+
+\begin{lstlisting}
+	listeVehicules[i].description()
+\end{lstlisting}
+
+va toujours appeler la m\^eme fonction \functionname{Vehicule.description}, et
+ce, \emph{quelque soit le type de l'objet qui est fourni}. Il nous faudrait
+donc un moyen d'indiquer au compilateur qu'il doit \emph{\`a l'ex\'ecution}
+d\'eterminer le type de l'objet, et appeler la fonction en cons\'equence. Le
+C++ rend cela possible, au moyen du mot cl\'e \keyword{virtual} que l'on va
+associer au \`a une fonction. On appelera \emph{fonction virtuelle} une fonction dont l'adresse est d\'etermin\'ee \`a l'ex\'ecution.
+
+Une fonction virtuelle est d\'eclar\'ee de la mani\`ere suivante:
+\begin{lstlisting}[caption = fichier.h]
+	class MaClasse
+	{
+		virtual typeDeRetour nomFonction(parametres);
+	}
+\end{lstlisting}
+
+Le code reste lui inchang\'e :
+\begin{lstlisting}[caption = fichier.cpp]
+	typeDeRetour MaClasse::nomFonction(parametres)
+	{
+	  /*code*/
+	  return x;
+	}
+\end{lstlisting}
+
+Nos headers restent donc inchang\'es, \`a l'exception de l'ajout du mot cl\'e \keyword{virtual} :
+
+\includecode{vehicule5.h}
+\includecode{velo5.h}
+\includecode{voiture5.h}
+
+
+Au vu des probl\`emes pos\'es par l'absence du mot cl\'e \keyword{virtual} dans
+certains cas, on est en droit de se demander pourquoi sa pr\'esence n'est pas
+syst\'ematique. La raison principale est une question de performances. En
+effet, d\'eterminer \`a l'ex\'ecution quelle fonction il faut appeler, et ce
+\`a chaque appel, n'est pas gratuit.
+
+
+Ceci fait, il peut enfin utiliser sa fonction d'affichage g\'en\'erique :
+
+\includecodecaption{main_vehicules5.cpp}{main\_vehicules5.cpp}
+
+\section{Classes abstraites}
+
+Nous avons vu l'emploi des fonctions virtuelles, qui permettent aux ``bonnes''
+fonctions des classes d\'eriv\'ees d'\^etre appel\'ees. L'id\'ee importante \`a
+retenir est que l'on peut cr\'eer de nouvelles classes, qui, si elles se
+conforment \`a un mod\`ele donn\'e (celui donn\'e par \classname{vehicule}),
+c'est-\`a-dire \`a une \emph{interface}, peuvent s'int\'egrer naturellement
+dans un ensemble existant. Pourquoi ne pas pousser le raisonnement un peu plus
+loin?
+
+Assez fr\'equemment, il arrive que l'on souhaite d\'efinir un objet de
+mani\`ere abstraite, g\'en\'erique, sans vouloir l'utiliser tel quel. Par
+exemple, la classe v\'ehicule que l'on a d\'efini pr\'ec\'edemment, n'a pas
+beaucoup d'int\'er\^et utilis\'ee telle quelle. En effet,
+
+\begin{itemize}
+
+	\item On veut toujours savoir quel type de v\'ehicule on manipule.
+
+	\item La m\'ethode qui affiche le type de v\'ehicule affiche "Un
+		vehicule qui coute x Euros" ce qui n'a pas
+		d'int\'er\^et.
+
+\end{itemize}
+
+Id\'ealement, on voudrait pouvoir :
+\begin{itemize}
+
+	\item interdire la cr\'eation d'objets de type v\'ehicule ;
+
+	\item obliger l'utilisateur \`a cr\'eer des classes d\'eriv\'ees;
+
+	\item obliger l'utilisateur \`a surcharger certaines m\'ethodes, par
+		exemple la m\'ethode \texttt{description}.
+
+\end{itemize}
+
+Tout ceci est possible, en transformant notre classe \texttt{vehicule} en une
+classe abstraite. Cela se fait tr\`es simplement : dans le fichier de
+d\'eclaration de la classe (le header), il suffit d'ajouter "\texttt{=0;}" \`a
+la suite du nom d'une m\'ethode. Alors :
+
+\begin{itemize}
+
+	\item La m\'ethode en question devient \emph{virtuelle pure} et il est
+		obligatoire de la surcharger. Si $n$ m\'ethodes sont
+		\emph{virtuelles pures}, il faut surcharger les $n$ m\'ethodes.
+		
+	\item L'utilisateur ne pourra pas cr\'eer d'objet de la classe
+		\texttt{vehicule}, celle-ci devenant abstraite. Une seule m\'ethode virtuelle pure suffit \`a rendre toute la classe abstraite.
+
+\item L'utilisateur devra obligatoire cr\'eer une classe d\'eriv\'ee, dans
+	laquelle la m\'ethode en question devra obligatoirement \^etre
+	surcharg\'ee.
+
+\end{itemize}
+
+En l'occurrence :
+\includecode{vehicule6.h}
+
+
+et
+\includecodecaption{main_vehicules6.cpp}{main\_vehicules6.cpp}
+
+
+Une des cons\'equences directes de l'emploi d'une classe abstraite est qu'un pasage par valeur d'une classe abstraite  n'est pas valable :
+
+\begin{lstlisting}
+	void f(Vehicule v)
+	{
+	}
+\end{lstlisting}
+
+\warning En effet, comme \classname{Vehicule} ne peut pas \^etre instanci\'ee, il n'est en particulier pas possible d'en faire une copie. Le code en question ne compilera donc pas. Si l'on souhaite n\'eanmoins faire ce genre de passage, il faut passer par un pointeur (et pas une r\'ef\'erence, qui doit toujours pointer sur quelque chose d'existant) :
+
+\begin{lstlisting}
+	void f(Vehicule * v)
+	{
+	}
+\end{lstlisting}
+
+
+\section{Surcharge}
+\subsection{Construction et destruction}
+
+Que se passe-t-il lorsque l'on surcharge le constructeur d'une classe
+d\'eriv\'ee? Le constructeur de la classe m\`ere est d'abord appel\'e, suivi
+par le constructeur de la classe fille.  Pour le destructeur, c'est
+logiquement l'inverse : le destructeur de la classe fille est appel\'e
+d'abord, suivi par le destructeur de la classe m\`ere.
+
+Par exemple, consid\'erons les deux classes suivantes, dont la seule capacite
+est d'afficher quelque chose lorsqu'elles sont instanciees :
+
+\includecodecaption{surchargeConstructeur.h}{Une classe mere et une classe fille}
+
+\includecodecaption{surchargeConstructeur.cpp}{Une classe mere et une classe fille}
+
+ainsi que le programme principal suivant :
+
+\includecodecaption{surchargeConstructeurMain.cpp}{Programme principal}
+
+Conform\'ement \`a l'ordre d'appel des constructeurs, le programme affichera :
+
+\verbatiminput{code/surchargeConstructeur.out}
+
+
+
+
+\subsection{H\'eritage et visibilit\'e}
+
+Nous avions mentionn\'e dans la section METTRE REF qu'il \'etait possible de
+d\'eclarer une classe d\'eriv\'ee au moyen de trois mots cl\'es diff\'erents :
+\keyword{private}, \keyword{protected}, et \keyword{public}. Jusqu'\`a
+pr\'esent, nous n'avons employ\'e que le mot cl\'e \keyword{public}. Que
+signifie-t-il pr\'ecis\'ement?
+
+
+Chacun d'entre eux agit comme une sorte de filtre sur la visibilit\'e des membres de la classe m\`ere.
+
+A AMEliorer
+
+\begin{table}
+	\centering
+	\begin{tabular}{l|l|l|l}
+	 & public & protected & private\\
+	\hline
+	\keyword{public}  & \keyword{public} & \keyword{protected} & non visible \\
+	\hline
+	\keyword{protected}  & \keyword{protected} & \keyword{protected} & Non visible\\
+	\hline
+	\keyword{private}  & \keyword{private} & \keyword{private} & Non visible\\
+	\end{tabular}
+	\caption{Visibilit\'e et type d'h\'eritage}
+	\label{tab:heritagevisibilite}
+\end{table}
+
+
+\section{H\'eritage multiple}
+
+Nous avons vu dans la section pr\'ec\'edente que l'h\'eritage permet de
+d\'ecrire une relation ``est un'' entre deux objets. Cependant, comment faire
+dans le cas o\`u un objet ``est un'' X \emph{et} un Y ? L'h\'eritage multiple
+permet de r\'esoudre ce probl\`eme. Avant de poursuivre, il me para\^it bon de
+pr\'eciser que l'h\'eritage multiple peut \^etre \emph{dangereux\footnote{Il
+est consid\'er\'e comme suffisamment dangereux pour \^etre explicitement
+interdit dans certains langages, JAVA \'etant sans doute le plus c\'el\`ebre
+exemple. Cela ne veut pas dire qu'il ne faut jamais s'en servir, mais
+simplement qu'il faut \^etre conscient des difficult\'es associ\'ees.}}, pour
+des raisons qui deviendront claires par la suite.
+
+\subsection{Principe}
+
+L'id\'ee est assez naturelle : nous allons faire h\'eriter notre classe
+d\'eriv\'ee de \emph{deux} classes m\`eres. D'un point de vue syntaxique, on \'ecrira:
+
+\begin{lstlisting}
+	class Fille :
+		public|protected|private class Mere1,
+		public|protected|private class Mere2,
+		. . .
+		public|protected|private class Meren
+	{
+	}		
+\end{lstlisting}
+
+Par exemple, consid\'erons les classes de v\'ehicules pr\'ec\'edentes, et
+ajoutons une nouvelle classe repr\'esentant un avion (ou tout autre objet
+volant), qui va \'egalement d\'eriver de \classname{vehicule}. Celui-ci aura
+une nouvelle propri\'et\'e qui sera l'altitude maximum \`a laquelle le v\'ehicule peut voler.
+
+\includecodecaption{avion4.h}{V\'ehicule volant}
+
+Supposons \`a pr\'esent que l'on souhaite manipuler une voiture volante. Une telle voiture est \`a la fois un v\'ehicule volant et une voiture. Nous pouvons donc avoir recours \`a l'h\'eritage multiple et \'ecrire :
+
+\includecode{voiturevolante.h}
+
+Nous pouvons repr\'esenter l'ensemble des relations entre nos classes sur le
+diagramme de la figure \ref{fig:heritageVehiculeVolant}.
+
+%\begin{figure}[]
+%	\begin{center}
+%		\includegraphics{heritageVehiculeVolant.1}
+%	\end{center}
+%	\caption{H\'eritage multiple}
+%	\label{fig:heritageVehiculeVolant}
+%\end{figure}
+
+Jusqu'ici, les choses paraissent assez naturelles. Cependant, nous pouvons
+remarquer que \classname{VoitureVolante} d\'erive de \classname{Voiture}  et
+\classname{VehiculeVolant}, qui d\'erivent elles-m\^eme de la m\^eme classe de
+base \classname{Vehicule}. Si l'on regarde le dessin form\'e par les bo\^ites
+d\'ecrivant les objets et les fl\`eches les reliant (figure
+\ref{fig:heritageVehiculeVolant}), on constate que l'ensemble forme - au moins
+approximativement - un losange, que l'on appelle en anglais \textit{diamond}.
+C'est l\`a que se trouve la difficult\'e principale de l'h\'eritage multiple,
+que nous allons expliciter \`a pr\'esent.
+
+\subsection{Le probl\`eme du losange}
+
+Le probl\`eme est le suivant : la m\'ethode \functionname{description} a
+\'et\'e surcharg\'ee dans \classname{VehiculeVolant} comme dans
+\classname{Voiture}. Supposons maintenant que nous ajoutions une m\'ethode \`a
+\classname{VehiculeVolant} qui fasse appel \functionname{description} :
+
+\begin{lstlisting}
+VehiculeVolant::methodeSupplementaire()
+{
+	description();
+}
+\end{lstlisting}
+
+\`A la compilation, cette m\'ethode va provoquer une erreur. Pourquoi? Le
+probl\`eme est que la m\'ethode \functionname{description} qui a \'et\'e
+d\'efinie dans les classes m\`eres est h\'erit\'ee \emph{deux fois}. L'appel
+\`a la m\'ethode \functionname{description} est donc ambigu. Une fois de plus, le langage C++ nous fournit une technique permettant de lever cette ambiguit\'e, technique qui porte le nom d'\emph{h\'eritage virtuel}.
+
+\subsection{H\'eritage virtuel}
+
+La technique consiste simplement \`a pr\'eciser au compilateur qu'il ne doit
+h\'eriter des m\'ethodes de la classe \classname{Vehicule} qu'une seule fois,
+et non deux. Cela se fait au moyen du mot cl\'e \keyword{virtual} que l'on
+\'ecrira devant le nom de la classe dont on h\'erite :
+
+\begin{lstlisting}
+class Fille : public virtual Mere
+{
+}
+\end{lstlisting}
+
+Les headers de nos classes \classname{VehiculeVolant} et \classname{Voiture} deviendront donc:
+
+
+\includecodecaption{avion4.h}{vehiculeVolant4.h}
+\includecode{voiture4.h}
+
+Nous pouvons noter la pr\'esence du mot cl\'e \keyword{virtual} devant \classname{vehicule} dans la d\'eclaration d'h\'eritage.
+
+
+\section{M\'ethodes amies}
+
+Un cas un peu particulier peut parfois se poser. Supposons que l'on dispose de
+deux classes, chacune avec des membres priv\'es et des membres publics. Le code
+peut se pr\'esenter comme suit :
+
+
+\includecode{A.h}
+\includecode{A.cpp}
+\includecode{B.h}
+\includecode{B.cpp}
+
+
+Nous constatons que dans la m\'ethode \texttt{add\_a\_to\_X} cherche \`a
+utiliser le membre priv\'e \texttt{m\_private\_a} de la classe A. Comme ce
+membre est priv\'e, , la m\'ethode n'y a pas acc\`es, et le code ne compilera
+pas.
+
+Une solution simple serait d'utiliser des accesseurs - c'est-\`a-dire de
+rajouter des m\'ethodes \texttt{get\_a} et \texttt{set\_a} \`a la classe A,
+puis de les appeler depuis B. Cependant, dans certains cas bien
+pr\'ecis\footnote{Il est malheureusement difficile de construire un exemple \`a
+la fois naturel et simple.}, on ne peut pas avoir recours \`a cette technique.
+
+L'id\'eal serait de permettre un acc\`es \emph{s\'el\'ectif} aux membres
+priv\'es de A, c'est-\`a-dire de r\'eserver cet acc\`es \`a certaines classes
+seulement. Ceci est possible en C++, il suffit de la d\'eclarer \emph{amie}, au
+moyen du mot cl\'e \texttt{friend}.
+
+\includecodecaption{A_friend.h}{A\_friend.h}
+
+
+
+
+\begin{recapitulatif}
+\item Il est possible de sp\'ecifier des param\`etres par d\'efaut dans une m\'ethode:
+\begin{lstlisting}
+void f(int param1, int param2, int param3 = 5);
+\end{lstlisting}
+
+\item Il est possible de d\'efinir plusieurs fois la m\^eme fonction mais avec des param\`etres diff\'erents. Le type de retour seul n'est pas suffisant pour
+diff\'erencier deux fonctions.
+\begin{lstlisting}
+void f(int x);
+double f(int x, int y);
+\end{lstlisting}
+
+\item L'h\'eritage permet \`a une classe \emph{fille} de r\'ecup\'erer toutes les m\'ethodes et propri\'et\'es d'une classe \emph{m\`ere}. Le degr\'e de visibilit\'e
+des m\'ethodes de la classe m\`ere au sein de la classe fille est d\'etermin\'e par les mots cl\'e \texttt{private}, \texttt{protected}, et \texttt{public} :
+\begin{lstlisting}
+class A
+{
+//...
+}
+
+class B : public A
+{
+ //...
+}
+
+\end{lstlisting}
+
+\item L'h\'eritage peut \^etre simple ou multiple. Pour r\'esoudre les probl\`emes d'ambiguit\'es, on a parfois recourt \`a l'h\'eritage virtuel.
+
+\item Une fonction virtuelle est une fonction dont l'adresse n'est connue qu'\`a l'ex\'ecution.
+
+\item Il est possible d'interdire l'instanciation d'une classe, et d'imposer sa d\'erivation. Une telle classe est dite abstraite. Dans sa d\'eclaration, il suffit
+de faire suivre la d\'eclaration de la m\'ethode \`a surcharger de \texttt{=0} :
+\begin{lstlisting}
+class Abstraite
+{
+    virtual int methode(int x) = 0;
+}
+
+\end{lstlisting}
+\end{recapitulatif}

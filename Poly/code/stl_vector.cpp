@@ -1,0 +1,31 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+
+
+int main()
+{
+	//un vecteur d'entiers \`a trois \'el\'ements.
+	vector<int> v(3);
+	int i;
+
+	cout << "Veuillez rentrer trois nombres, en appuyant sur <ENTER> ";
+	cout << "Entre chaque nombre " << endl;
+
+	for (i = 0; i < 3 ; i++)
+		//On manipule le vecteur comme un tableau
+		cin >> v[i];
+
+	cout << "Un autre nombre ?" << endl;
+	double temp;
+	cin >> temp;
+	//On ajoute un nouvel \'el\'ement \`a notre vecteur;
+	v.push_back(temp);
+
+	cout << "Les nombres fournis sont :";
+	//affichage des nombres, le tableau connait sa taille*/
+	for (i = 0; i < v.size() ; i++)
+		cout << v[i] <<" ";
+	
+}

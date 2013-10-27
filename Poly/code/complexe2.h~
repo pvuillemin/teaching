@@ -1,0 +1,9 @@
+struct Complexe
+{
+    Complexe(double _rho, double _theta);
+    ~Complexe();
+
+    double rho, theta;
+    double module();
+    double argument();
+};

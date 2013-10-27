@@ -1,0 +1,20 @@
+#include <iostream.h>
+
+enum Taille
+{
+	PETIT,
+	MOYEN,
+	GRAND;
+}
+
+void f(Taille taille)
+{
+	if (taille == PETIT)
+		cout <<"petit";
+}
+
+
+int main()
+{
+	f(PETIT);
+}

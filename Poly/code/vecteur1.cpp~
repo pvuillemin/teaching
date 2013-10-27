@@ -1,0 +1,26 @@
+#include "vecteur1.h"
+#include <math.h>
+
+void norme(struct Vecteur *v)
+{
+    double total = 0;
+    int i;
+
+    for( i = 0 ; i < (*v).dimension ;  i++)
+        total += (*v).coordonnees[i] * (*v).coordonnees[i];
+
+    (*v).norme = sqrt(total);
+}
+
+void creeVecteur(struct Vecteur *v, int dimension)
+{
+    v->dimension=dimension;
+    /* on alloue la m\'emoire n\'ecessaire*/
+    v->coordonnees = new double [ dimension ]; 
+}
+
+void detruitVecteur(struct Vecteur *v)
+{
+    v->dimension = 0;
+    delete []( v->coordonnees);
+}

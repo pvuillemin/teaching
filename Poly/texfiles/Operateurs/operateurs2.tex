@@ -1,0 +1,439 @@
+\begin{savequote}[80mm]
+---Have you ever sat down and worked on a C++ project?  Here's
+    what happens: First, I've put in enough pitfalls to make sure
+    that only the most trivial projects will work first time. Take
+    operator overloading.  At the  end of the project, almost every module
+    has it, usually, because  guys feel they really should do it, as it
+    was in their training  course.  The same operator then means something
+    totally different in every module.
+\qauthor{Parodie d'interview de Bjarne Stroustrup}
+\end{savequote}
+\chapter{Op\'erateurs}
+\label{chapter:operateurs}
+
+\section{Introduction}
+Dans le chapitre pr\'ec\'edent, nous avons \'ecrit un objet Accumulator, qui permettait de collecter une grande quantit\'e de nombres pour en calculer des statistiques \'el\'ementaires. Nous souhaiterions maintenant pouvoir assembler ("merger" dans la langue de Shakespeare) deux instances de cette classe en une troisi\'eme instance, qui serait dans le même état que si elle avait résumé tous les nombres présentés aux deux premières instances. Dans ce but, nous pouvons écrire une fonction Merge :
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = Accumulator.h]
+//Accumulator.h
+#ifndef ACCUMULATOR_H
+#define ACCUMULATOR_H
+
+class Accumulator
+{
+private:
+	int _n;
+	double _xSum;
+	double _xSquareSum;
+	static int nTotal;
+	static int accumulatorInstancesCreated;
+
+public:
+	Accumulator(int, double, double);
+	Accumulator();
+	~Accumulator(void);
+	void Add(double);
+	static int GetInstancesCreatedCount(void); //new static method just created
+    Accumulator MergeWith(const Accumulator&);
+
+	double GetMean(void);
+	int GetN(void);
+};
+
+#endif
+\end{lstlisting}\end{DDbox}
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = Accumulator.cpp]
+//In Accumulator.cpp :
+
+Accumulator Accumulator::MergeWith(const Accumulator& acc2)
+{
+	Accumulator result;
+    result._n = _n + acc2._n;
+    result._xSum = _xSum + acc2._xSum;
+    result.xSquareSum = _xSquareSum + acc2._xSquareSum;
+    return result;
+}
+\end{lstlisting}\end{DDbox}
+
+Nous pouvons alors utiliser ce code de la sorte :
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = main.cpp]
+//In main.cpp :
+
+#include "Accumulator.h"
+
+void main()
+{
+    Accumulator acc1;
+    Accumulator acc2;
+    acc1.Add(2);
+    acc1.Add(3);
+
+    acc2.Add(2.3);
+
+    Accumulator sum = acc1.MergeWith(acc2);
+}
+
+\end{lstlisting}\end{DDbox}
+
+Ce code a deux défauts mineurs. Tout d'abord, il pourrait être rendu plus compact. Plus gênant, il donne une impression d'assymétrie entre les instances acc1 et acc2, qui ont pourtant des rôles parfaitement symétriques. Nous voudrions pouvoir remplacer cette syntaxe par quelquechose de la sorte :\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = main.cpp]
+//In main.cpp :
+
+#include "Accumulator.h"
+
+void main()
+{
+    Accumulator acc1;
+    Accumulator acc2;
+    acc1.Add(2);
+    acc1.Add(3);
+
+    acc2.Add(2.3);
+
+    Accumulator sum = acc1 + acc2;
+}
+
+\end{lstlisting}\end{DDbox}
+
+Cette syntaxe est rendue possible en C++ par la définition d'un opérateur. Il faut appréhender en première approche les opérateurs comme des fonctions membres, c'est à dire des méthodes. Nous allons donc définir notre opérateur comme s'il s'agissait d'une fonction membre à part entière, en ajoutant seulement le mot clef "operator" :
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = Accumulator.h]
+//Accumulator.h
+#ifndef ACCUMULATOR_H
+#define ACCUMULATOR_H
+
+class Accumulator
+{
+private:
+	int _n;
+	double _xSum;
+	double _xSquareSum;
+	static int nTotal;
+	static int accumulatorInstancesCreated;
+
+public:
+	Accumulator(int, double, double);
+	Accumulator();
+	~Accumulator(void);
+	void Add(double);
+	static int GetInstancesCreatedCount(void);
+  Accumulator operator+(const Accumulator&);
+
+	double GetMean(void);
+	int GetN(void);
+};
+
+#endif
+\end{lstlisting}\end{DDbox}
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = Accumulator.cpp]
+//In Accumulator.cpp :
+
+Accumulator Accumulator::operator+(const Accumulator& acc2)
+{
+    Accumulator result;
+    result._n = _n + acc2._n;
+    result._xSum = _xSum + acc2._xSum;
+    result.xSquareSum = _xSquareSum + acc2._xSquareSum;
+    return result;
+}
+\end{lstlisting}\end{DDbox}
+
+\begin{habitudes}[Quand surcharger un opérateur ?]
+Pratiquement jamais. Il ne faut jamais surcharger un opérateur si le sens exact de l'opérateur n'est pas parfaitement limpide. Dans ce cas, il vaut mieux implémenter une fonction avec un nom suggestif. Dans la plupart des cas, implémenter un opérateur est une mauvaise idée, et vous devez vous abstenir de le faire sauf si c'est vraiment la solution évidente et indiscutable. Dès lors que le sens possible que pourrait avoir un opérateur soulève la plus petite ambigüité, ne l'implémentez-pas.
+\end{habitudes}
+
+\begin{habitudes}[Ne pas implémenter un seul opérateur]
+Si après mûre réflexion, vous avez décidé d'implémenter un opérateur, implémenter les tous. Si $a$ et $b$ sont deux instances de type $T$, et que le type $T$ implémente un opérateur $+$, alors nous pouvons écrire $a+b$. Dans ce cas, l'utilisateur de la classe $T$ s'attend également à trouver l'opérateur $+=$. De la même manière, si l'opérateur "prefix increment" (non détaillé jusqu'à présent dans ce poly) $++a$ est implémenté, implémentez également l'opérateur "suffix increment" $a++$. Enfin, si vous surchargez l'opérateur $<$, surchargez également l'opérateur $>$.
+\end{habitudes}
+
+\begin{habitudes}[Ne pas oublier qu'un opérateur "coûte"]
+En dépit de la compacité du code d'utilisation d'un opérateur, il ne faut pas oublier que du point de vue de la machine, un opérateur revient à appeler une méthode, et s'accompagne donc d'un certain coût. Ainsi, lorsque nous étudierons la classe vector, vous verrez que l'opérateur [] est bien plus coûteux que l'opérateur [] pour les tableaux natifs.
+\end{habitudes}
+
+\section{Quelques exemples pertinents de surcharge d'opérateurs}
+
+Nous donnons pour illustrer notre propos quelques cas dans lesquels l'usage d'opérateurs est justifié. Comme nous n'avons pour l'instant pas découvert beaucoup de classes, ces exemples ne vous parleront pas pour le moment, mais vous pourrez y revenir en temps voulu.\\
+
+\begin{itemize}
+\item Opérateur [] pour la classe vector
+\item Opérateur -> pour les smart pointers
+\item Opérateur ++ pour les itérateurs
+\item Opérateur +,* pour les classes de type math (vecteur, matrices, big integer, etc.)
+\item Opérateur = pour toutes les classes avec de la gestion de ressource (cf chapitre allocation dynamique de mémoire)
+\end{itemize}
+
+
+\section{Un autre exemple}
+
+Dans ce paragraphe, nous donnons un autre exemple d'utilisation d'opérateurs, dans un cas archi-classique, celui d'un code mathématique, en l'occurence l'implémentation (partielle) d'une classe Complex.
+
+\warning{Il est fondamental en informatique de ne pas réinventer la roue. Probablement, le problème auquel vous devez faire face a déjà été rencontré et résolu par de nombreuses personnes avant vous. Outre le fait qu'elles sont probablement plus compétentes que vous, le code qu'elles ont produit a été éprouvé par le temps et l'usage, et il sera a priori moins sujet aux bugs que vous ne manquerez pas de rencontrer si vous optez pour une solution que vous développerez vous-même. En conséquence, \textbf{considérez toujours d'abord de réutiliser du code\footnote{Ce qui ne vous dédouane pas de le tester bien sûr, par exemple unitairement.} plutôt que d'en écrire.} Dans notre cas, il est évident qu'il ne faut jamais réimplémenter une classe Complex, nous en donnons juste une implémentation partielle à titre pédagogique.}
+
+Notez que certains opérateurs sont implémentés comme des fonctions membres, alors que d'autres non. Celà respecte les suggestions fournies dans le paragraphe \ref{section:InternAndExternOperators}.
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = Complex.h]
+#ifndef COMPLEX_H
+#define COMPLEX_H
+
+class Complex
+{
+public:
+    Complex(double,double);
+	~Complex(void);
+	void operator += (const Complex&);
+	void operator -= (const Complex&);
+
+private:
+	double _real;
+	double _im;
+};
+
+//Non-Member functions
+Complex operator + (const double&, const Complex&);
+Complex operator + (const Complex&, const double&);
+Complex operator + (const Complex&, const Complex&);
+
+Complex operator - (const double&, const Complex&);
+Complex operator - (const Complex&, const double&);
+Complex operator - (const Complex&, const Complex&);
+
+#endif
+\end{lstlisting}\end{DDbox}
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = Complex.cpp]
+#include "Complex.h"
+
+Complex::Complex(double real, double imaginary)
+{
+	_real = real;
+	_im = imaginary;
+}
+
+Complex::~Complex(void)
+{
+}
+
+void Complex::operator+=(const Complex& c2)
+{
+	_real +=c2._real;
+	_im += c2._im;
+}
+
+void Complex::operator+=(const double& real)
+{
+	_real +=real;
+}
+
+void Complex::operator-=(const Complex& c2)
+{
+	_real -=c2._real;
+	_im -= c2._im;
+}
+
+void Complex::operator-=(const double& real)
+{
+	_real -= real;
+}
+
+Complex operator+(const Complex& c1, const double& real)
+{
+	Complex result = Complex::FromCartesian(0,0);
+	result += c1;
+	result += real;
+	return result;
+}
+
+Complex operator+(const double& real, const Complex& c2)
+{
+	return c2 + real;
+}
+
+Complex operator-(const Complex& c1, const double& real)
+{
+	Complex result = Complex::FromCartesian(0,0);
+	result += c1;
+	result -= real;
+	return result;
+}
+
+Complex operator-(const double& real, const Complex& c2)
+{
+	Complex result = Complex::FromCartesian(0,0);
+	result += real;
+	result -= c2;
+	return result;
+}
+
+\end{lstlisting}\end{DDbox}
+
+\subsection{Digression autour du "Named Constructor Idiom"}
+
+Dans notre classe Complex, il y a deux manières naturelles de construire une instance complexe : \\
+
+\begin{itemize}
+\item Par coordonnées cartésiennes, en donnant la partie réelle et la partie imaginaire du nombre.
+\item Par coordonnées polaires, en donnant le module et l'argument de notre complexe.\\
+\end{itemize}
+
+Malheureusement, ces deux manières de constuire un complexe font toutes les deux appels à deux arguments de type double, et il y a un risque qu'un utilisateur de notre classe construise un complexe en donnant de mauvais arguments. Par exemple, supposons qu'un utilisateur de notre classe Complex veuille constuire le nombre $i$ en donnant son module et son argument (1, $\frac{\pi}{2}$). Il pourrait être tenté de le constuire de la sorte : \\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = main.cpp]
+#include "Complex.h"
+void main()
+{
+    Complex c(1,Pi/2);
+}
+\end{lstlisting}\end{DDbox}
+
+Pour empêcher cette utilisation (qui mène au complexe $1 + \frac{\pi}{2}i$), nous voudrions avoir un nom plus spécifique pour le consructeur que simplement "Complex", afin de lever cette ambiguïté. Pour ce faire, nous recourons au design dit du "Named Constructor".
+
+\begin{itemize}
+\item Tout d'abord, nous mettons les constructeurs de notre classe en private, afin de nous assurer qu'ils ne pourront plus être utilisés directement.
+\item Ensuite, nous proposons des méthodes publiques static dont la fonction sera de construire une instance d'une manière spécifique.
+\item L'utilisateur peut et doit alors passer par ces méthodes pour construire un complexe.\\ 
+\end{itemize}
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = Complex.h]
+#ifndef COMPLEX_H
+#define COMPLEX_H
+
+class Complex
+{
+public:
+	static Complex FromCartesian(double, double);
+	static Complex FromPolar(double,double);
+	~Complex(void);
+	void operator += (const Complex&);
+	void operator += (const double&);
+	void operator -= (const Complex&);
+	void operator -= (const double&);
+
+private:
+	double _real;
+	double _im;
+	Complex(double,double);
+};
+
+//Non-Member functions
+Complex operator + (const double&, const Complex&);
+Complex operator + (const Complex&, const double&);
+Complex operator + (const Complex&, const Complex&);
+
+Complex operator - (const double&, const Complex&);
+Complex operator - (const Complex&, const double&);
+Complex operator - (const Complex&, const Complex&);
+
+#endif
+\end{lstlisting}\end{DDbox}
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = Complex.cpp]
+#include "Complex.h"
+#include <cmath>
+
+Complex Complex::FromCartesian(double real, double imaginary)
+{
+    return Complex(real, imaginary);
+}
+
+Complex Complex::FromPolar(double radius, double angle)
+{
+    return Complex(radius*std::cos(angle), radius*std::sin(angle));
+}
+
+Complex::Complex(double real, double imaginary)
+{
+	_real = real;
+	_im = imaginary;
+}
+
+Complex::~Complex(void)
+{
+}
+
+Complex operator+(const Complex& c1, const double& real)
+{
+	Complex result = Complex::FromCartesian(0,0);
+	result += c1;
+	result += real;
+	return result;
+}
+
+Complex operator+(const double& real, const Complex& c2)
+{
+	return c2 + real;
+}
+
+Complex operator-(const Complex& c1, const double& real)
+{
+	Complex result = Complex::FromCartesian(0,0);
+	result += c1;
+	result -= real;
+	return result;
+}
+
+Complex operator-(const double& real, const Complex& c2)
+{
+	Complex result = Complex::FromCartesian(0,0);
+	result += real;
+	result -= c2;
+	return result;
+}
+
+void Complex::operator+=(const Complex& c2)
+{
+	_real +=c2._real;
+	_im += c2._im;
+}
+
+void Complex::operator+=(const double& real)
+{
+	_real +=real;
+}
+
+void Complex::operator-=(const Complex& c2)
+{
+	_real -=c2._real;
+	_im -= c2._im;
+}
+
+void Complex::operator-=(const double& real)
+{
+	_real -= real;
+}
+\end{lstlisting}\end{DDbox}
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = main.cpp]
+#include "Complex.h"
+void main()
+{
+    Complex c1 = Complex::FromPolar(1,Pi/2);
+    Complex c2 = Complex::FromCartesian(0,1);
+}
+\end{lstlisting}\end{DDbox}
+
+\section{Op\'erateurs internes, op\'erateurs externes}
+\label{section:InternAndExternOperators}
+
+
+
+\begin{recapitulatif}
+\item Il est possible de surcharger les op\'erateurs classiques, afin de permettre une manipulation plus ais\'ee \`a l'utilisateur de la classe.
+\item Un op\'erateur est soit externe, soit interne.
+\item Il faut surcharger les op\'erateurs avec parcimonie.
+\end{recapitulatif} 

@@ -1,0 +1,20 @@
+#include "velo2.h"
+#include "vehicule2.h"
+
+void afficheTypeVehicules(Vehicule *listeVehicules, int nVehicules)
+{
+    //Attention, ne fonctionne pas!
+    for(int i = 0; i < nVehicules; i++)
+        listeVehicules[i].afficheType();
+}
+	
+int main()
+{
+	Velo * liste_velos = new Velo[10];
+
+	afficheTypeVehicules(liste_velos, 10);
+
+	delete[] liste_velos;
+
+	return 0;
+}

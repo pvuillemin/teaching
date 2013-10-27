@@ -1,0 +1,164 @@
+\documentclass[a4paper]{book}
+
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{epsfig} % use this package to include EPS format figures
+\usepackage{wrapfig}
+\usepackage{amsmath}
+%\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+%\usepackage[french]{babel}
+%\usepackage[T1]{fontenc}
+\usepackage{manfnt}
+\usepackage{listings}
+\usepackage{verbatim}
+\usepackage{fancybox}
+%
+%\usepackage{pst-all}
+%
+%
+\usepackage{url}
+\usepackage{wrapfig}
+\usepackage{titleref}
+\usepackage{makeidx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{quotchap}
+\usepackage{xcolor}
+
+
+%Chapitre sans numero, avec ajout automatique dans la TOC
+\newcommand{\starlesschapter}[1]
+{
+    \chapter*{#1}
+    \addcontentsline{toc}{chapter}{#1}
+    \markboth{ \MakeUppercase{#1} }{ \MakeUppercase{#1} }
+}
+
+\newcommand{\includecodecaption}[2]{%
+\begin{DDbox}{\linewidth}%
+\lstinputlisting[caption = #2, label=lst:#1]{../../code/#1}%
+\end{DDbox}%
+}
+
+%Environnement de recapitulatif
+\newcommand{\titledframe}[2]{%
+\boxput*(-0.6,1){\psframebox*{#1}}%
+{\psshadowbox[framesep=12pt]{#2}}}%
+
+\newenvironment{recapitulatif}%
+{%
+\newpage
+\begin{Sbox}%
+\begin{minipage}{\textwidth}%
+\medskip%
+ \begin{list}%
+    {$\bullet$}%
+    {\setlength{\labelwidth}{30pt}%
+     \setlength{\leftmargin}{35pt}%
+     \setlength{\itemsep}{\parsep}}%
+}
+{\end{list} \end{minipage}\end{Sbox}%
+\medskip%
+%\titledframe{\normalfont{\Large{\bfseries{Récapitulatif}}}}{\TheSbox}%
+}%
+
+%Environnement bonnes habitudes
+\newcommand{\titledframehabitudes}[2]{%
+\boxput*(-0.6,1){\psframebox*{#1}}%
+{\psframebox[framesep=12pt]{#2}}}%
+
+
+\newenvironment{habitudes}%
+{%
+\begin{floatingfigure}{5cm}
+\begin{Sbox}%
+\begin{minipage}{4.5cm}%
+
+}
+{ \end{minipage}\end{Sbox}%
+\medskip%
+\titledframehabitudes{\normalfont{{\bfseries{Bonnes habitudes}}}}{\TheSbox}%
+\end{floatingfigure}
+}%
+
+\newtheorem{habit}{Bonnes habitudes}
+
+\renewenvironment{habitudes}
+{%
+\begin{habit}
+}
+{
+\end{habit}
+}
+
+%Mots cles, fonctions et autres classes en C++
+\newcommand{\keyword}[1]{%
+\texttt{#1}%
+}
+
+\newcommand{\classname}[1]{%
+\texttt{#1}%
+}
+
+\newcommand{\functionname}[1]{%
+\texttt{#1}%
+}
+
+\newcommand{\varname}[1]{%
+\texttt{#1}%
+}
+
+%inclusion d'un fichier de code, avec titre automatique
+\newcommand{\includecode}[1]{%
+\begin{DDbox}{\linewidth}%
+\lstinputlisting[caption = #1, label=lst:#1]{../../code/#1}%
+\end{DDbox}%
+}
+
+\def\warning{\marginpar{\dbend}}
+
+\newenvironment{warning2}
+{
+\begin{DDbox}{\linewidth}%
+\marginpar{\dbend}
+}
+{
+\end{DDbox}%
+}
+
+%%configuration de listings
+\lstset{
+language=c++,
+basicstyle=\ttfamily\small, %
+identifierstyle=\color{black!60}, %
+keywordstyle=\color{blue}, %
+stringstyle=\color{red}, %
+commentstyle=\it\color{green!95!yellow!1}, %
+columns=flexible, %
+tabsize=2, %
+extendedchars=true, %
+showspaces=false, %
+showstringspaces=false, %
+numbers=left, %
+numberstyle=\tiny, %
+breaklines=true, %
+breakautoindent=true, %
+captionpos=b
+}
+
+\definecolor{Zgris}{rgb}{0.87,0.85,0.85}
+
+\newsavebox{\BBbox}
+\newenvironment{DDbox}[1]{
+\begin{lrbox}{\BBbox}\begin{minipage}{\linewidth}}
+{\end{minipage}\end{lrbox}\noindent\colorbox{Zgris}{\usebox{\BBbox}} \\
+[.5cm]}
+
+\begin{document}
+
+\input{heritage}
+
+\end{document}

@@ -1,0 +1,19 @@
+#include <iostream.h>
+
+/*le signe & indique que
+l'on passe par reference*/
+void incremente(int &i)
+{
+	i++;
+}
+
+
+void main(int argc, char **argv)
+{
+	int n = 0;
+	cout << n;
+	/*on n'a plus besoin de passer
+	l'adresse explicitement*/
+	incremente( n );
+	cout << n;
+}

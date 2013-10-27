@@ -1,0 +1,278 @@
+\chapter{Les templates}
+
+Les templates sont un m\'ecanisme puissant de factorisation de code, qui permettent d'\'ecrire du code g\'en\'erique s'appliquant \`a des donn\'ees, ind\'ependamment de leur type. Plus pr\'ecis\'ement, ils permettent de produire en un seul fichier une famille de fonctions ou une famille de classes indic\'ees par un type abstrait ou par un autre param\`etre comme un entier.\\
+
+\section{Templating par un type, l'exemple des fonctions}
+
+Les templates sont issus originellement d'un souci de simplification de code par la factorisation, afin d'\'eviter les redondances. Prenons l'exemple d'une fonction Max qui prenne en argument un tableau de double et la taille de ce tableau :\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+double Max(double array[], int length)
+{
+    double vmax = array[0];
+    for (int i = 1; i < length; i++)
+        if (array[i] > vmax)
+            vmax = array[i];
+    return vmax;
+}
+\end{lstlisting}
+\end{DDbox}
+
+Si nous voulions d\'efinir la m\^eme fonction sur un tableau d'entiers, nous devrions alors produire le code suivant : \\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+int Max(int array[], int length)
+{
+    int vmax = array[0];
+    for (int i = 1; i < length; i++)
+        if (array[i] > vmax)
+            vmax = array[i];
+    return vmax;
+}
+\end{lstlisting}
+\end{DDbox}
+
+De la m\^eme mani\`ere, nous pourrions d\'efinir la fonction Max sur un tableau de float, de ushort, de uint, de long, etc... Dans le cadre d'exemples plus complexes, le d\'edoublement du code pour chaque type est tr\`es p\'enalisant : tout d'abord, il nuit \`a la clart\'e du code pour le lecteur, mais il entraine aussi un risque important de divergence des diff\'erentes versions du code. En effet, si la s\'emantique de la fonction Max est incorrecte, elle le sera \`a la fois pour la version du code manipulant des entiers comme pour celle manipulant des doubles. Si un d\'eveloppeur est amen\'e \`a am\'eliorer ou d\'ebugger une version de cette fonction, il court le risque d'oublier que d'autres versions de cette fonction demandent probablement les m\^emes modifications.\\
+
+Nous le concevons donc, \textbf{la redondance du code est \`a proscrire}\footnote{La r\`egle 1 du d\'eveloppement pourrait \^etre : "ne faites pas de copier/coller de code au sein d'un projet."}. Comment dans ces conditions cr\'eer une seule fonction Max qui permette de d\'efinir cette fonction pour des entiers, mais aussi pour des double, des uint, etc... ? Le C++ propose un m\'ecanisme pour d\'efinir en une fois le code devant s'appliquer, quel que soit le type des arguments. Observons la syntaxe suivante : \\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+template<typename T>
+T Max(T array[], int length)
+{
+    T vmax = array[0];
+    for (int i = 1; i < length; i++)
+        if (array[i] > vmax)
+            vmax = array[i];
+    return vmax;
+}
+\end{lstlisting}
+\end{DDbox}
+
+Dans cet exemple, la fonction Max devient param\'etr\'ee par un type abstrait T. Celui-ci est utilis\'e dans notre exemple \`a la fois pour d\'efinir le type du premier argument de la fonction, mais \'egalement pour d\'efinir son type de retour. Le pr\'efixe template<typename T> indique au compilateur que le code qui suit sera param\'etr\'e par un type T. De mani\`ere \'equivalente, le mot clef \textit{typename} peut \^etre remplac\'e par \textit{class}.\\
+
+Lorsque dans notre code, nous voulons utiliser notre fonction Max, nous pouvons le faire de la sorte :\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+int values[]={ 16, 8, 3, 2, 11 };
+
+cout << Max<int>(values, 5);
+\end{lstlisting}
+\end{DDbox}
+
+Lorsque le compilateur va lire l'appel \`a Max(values, 5), il va d\'etecter qu'il s'agit d'utiliser la fonction templat\'ee Max dans le cas o\`u T = int. Le compilateur va alors g\'en\'erer le code correspondant et l'inclure dans la compilation. Bien \'evidemment, le compilateur ne g\'en\`erera la fonction Max que pour les types T pour lesquels il est fait appel quelque part \`a la fonction Max utilis\'ee pour le type T : si nulle part dans notre code nous ne cherchons \`a d\'eterminer le max d'un tableau de double, le code sp\'ecifique pour la fonction Max en le type double ne sera pas g\'en\'er\'e.\\
+
+Le fait d'utiliser une fonction templat\'ee en un type sp\'ecifique est appel\'e \textit{sp\'ecialisation}. Pouvons-nous sp\'ecialiser la fonction Max en n'importe quel type ? L'approche du C++ sur la question est une approche optimiste (\`a la diff\'erence du C\# par exemple) : par d\'efaut, tout type est accept\'e. C'est uniquement \`a la compilation que le compilateur va tenter de g\'en\'erer le code n\'ecessaire pour chacun des types en lesquels la fonction templat\'ee a \'et\'e sp\'ecialis\'ee. Si notre fonction est sp\'ecialis\'ee en un type T1 pour lequel l'op\'erateur < n'est pas d\'efini, alors le compilateur \'echouera dans la g\'en\'eration du code sp\'ecialis\'e.\\
+
+\subsection{Templates et macro}
+
+Si nous reprenons la fonction templat\'ee pr\'ec\'edente appliqu\'ee \`a deux valeurs plut\^ot qu'\`a un tableau, nous pouvons produire le code suivant :\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+template<typename T>
+const T & Max( const T & a, const T & b )
+{
+    return a > b ? a : b;
+}
+\end{lstlisting}
+\end{DDbox}
+
+Cet exemple ressemble beaucoup avec la macro correspondante, comme d\'etaill\'ee dans le chapitre sur la compilation :\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+\end{lstlisting}
+\end{DDbox}
+
+En effet, dans chaque cas, nous avons une impl\'ementation de la fonction max qui peut s'adapter \`a tous types d'objets. Le templating est la mani\`ere propre d'\'ecrire des macros. L\`a o\`u la macro est une simple substitution syntaxique, avec toutes les erreurs qui en d\'ecoulent (\ref{sec:macros}), le templating g\'en\`ere de r\'eelles fonctions et permet donc d'obtenir de mani\`ere fiable le r\'esultat.\\
+
+Dans la comparaison qui vient d'\^etre faite, il faut noter cependant qu'un avantage majeur de la macro par rapport \`a son homologue templat\'ee est l'absence d'appel de fonction : puisque la macro ne cr\'ee pas de v\'eritable fonction, il n'y a pas d'appel de fonction et donc pas de co\^ut d'appel de fonction. Il est possible d'\'eviter ce co\^ut \'egalement dans le cas d'une fonction templat\'ee, en l'inlinant :\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+template<typename T>
+inline const T & Max( const T & a, const T & b )
+{
+    return a > b ? a : b;
+}
+\end{lstlisting}
+\end{DDbox}
+
+\subsection{Fonctions membres templat\'ees}
+
+Il est \'egalement possible de cr\'eer une fonction templat\'ee au sein d'une classe non templat\'ee. L'exemple suivant d\'ecrit une classe disposant d'une fonction membre templat\'ee permettant d'afficher diff\'erente objets.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+class SomeClass
+{
+    public SomeClass();
+    public ~SomeClass();
+
+    template<typename T>
+    static void Display( const T & t )
+    {
+        cout << t;
+    }
+}
+
+int main()
+{
+    SomeClass.Display<int>(2);
+    SomeClass.Display<string>("Hello World");
+    SomeClass.Display<double>(3.14);
+}
+\end{lstlisting}
+\end{DDbox}
+
+\subsection{Inf\'erence automatique de type de sp\'ecialisation}
+
+Lorsque le compilateur est capable d'inf\'erer le type en lequel est sp\'ecialis\'ee une fonction templat\'ee, il est superflu de sp\'ecifier explicitement en quel type la fonction est sp\'ecialis\'ee. Dans le cas du code pr\'ec\'edent par exemple, nous pourrions \'ecrire :\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+int main()
+{
+    SomeClass.Display(2);
+    SomeClass.Display("Hello World");
+    SomeClass.Display(3.14);
+}
+\end{lstlisting}
+\end{DDbox}
+
+Il est cependant des cas o\`u une telle inf\'erence n'est pas possible, notamment dans le cas d'ambigu\"it\'e que le compilateur ne peut pas lever lui-m\^eme. Ainsi, la fonction suivante doit \^etre sp\'ecifi\'ee explicitement :\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+template <typename T>
+T Sum( T s1, T s2 )
+{
+    return s1 + s2;
+}
+
+int main()
+{
+    int s2 = 1;
+    double s1 = 3.2;
+
+    Sum( s1, s2 ); // Erreur : paramètre ambigü
+    Sum<double>( s1, s2 ); // OK
+}
+\end{lstlisting}
+\end{DDbox}
+
+\subsection{Multi-templating}
+
+Il est possible de param\'etrer une fonction par plusieurs arguments; en voici un exemple :\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+template<typename T, typename U>
+public T Add (const T& t, const U& u)
+{
+    return t+u;
+}
+\end{lstlisting}
+\end{DDbox}
+
+\section{Templating par un type, le cas des classes}
+
+\section{Templates et compilation}
+
+Un voile pudique est bien souvent jeté par les manuels d'introduction au C++ sur la compilation des templates. Ceux-ci répondant à des contraintes bien particulières (puisqu'il ne s'agit pas de code mais de "méta-code"), il n'est pas possible par défaut de déclarer une fonction template dans un fichier .h puis de la définir dans un fichier .cpp. Par défaut, il vous faudra donc mélanger déclaration et définition dans un même fichier .h sous peine de vous exposer à des erreurs à l'édition des liens. Comme il est expliqué dans l'article d'Aurélien Regat-Barrel sur le site cpp.developpez.com, il existe néanmoins une astuce permettant de contourner le problème.\\
+
+Cette astuce consiste à stocker la déclaration de votre classe templatée dans un fichier .h, de stocker votre définition dans un fichier texte (avec une extension différente de .cpp, comme .tpp par exemple), et d'inclure grâce à l'instruction \#include le fichier .tpp à la fin du fichier header. Ainsi, nous obtenons
+par exemple quelquechose de la forme : \\
+
+\begin{lstlisting}
+// exemple.h
+
+#ifndef EXEMPLE_H
+#define EXEMPLE_H
+
+template <typename T>
+class Exemple
+{
+public:
+    Exemple();
+};
+
+#include "exemple.tpp" // voici l'astuce
+#endif
+
+// exemple.tpp
+
+template <typename T>
+Exemple<T>::Exemple()
+{
+}
+
+\end{lstlisting}
+
+\section{Templates et spécialisation}
+
+Il existe certains cas où nous voudrions faire des exceptions à la généricité, c'est à dire que pour certains types bien particuliers, une fonction templatée ait un comportement particulier, qui diffère du comportement général déjà défini. Prenons le cas de l'exponentiation de 2. Si $y$ est un réel (double ou float), le calcul de $2^{y}$ demande de réécrire la formule en $e^{y.ln(2)}$ afin de l'évaluer. Nous pourrions donc écrire :\\
+
+\begin{lstlisting}
+
+template<typename T>
+double TwoPow(T y)
+{
+    return exp(y*ln(2);
+}
+\end{lstlisting}
+
+Cette fonction fonctionnerait également si elle était spécifiée en deux entiers. Cependant, dans le cas où y est entier, il n'est pas nécessaire de passer par cette formule, il suffit alors de multiplier 2 par lui même y fois. Bien que la formule précédente soit exacte dans le cas où y est entier, elle entrainerait donc des calculs indûment longs. Pour améliorer cette situation, nous voudrions dire au compilateur : compile la fonction précédente pour tous les types nécessaires, SAUF dans le cas où y est entier, auquel cas contente toi de calculer directement la valeur de l'exponentiation. En C++, il est possible de préciser/redéfinir une spécialisation spécifique.
+
+\begin{lstlisting}
+
+// Spécialisation pour les int
+template <>
+double TwoPow<int>( int i )
+{
+    double q= (i >= 0) ? 2 : 0.5;
+    int iAbs = abs(i);
+    double r=1;
+
+    for (int j = 0 ; j < iAbs;j++)
+        r*=q;
+
+    return r;
+}
+
+\end{lstlisting}
+
+\subsection{Spécialisation partielle}
+
+Les templates peuvent être partiellement spécialisés, et la classe obtenue est alors encore un template. Cette spécialisation partielle intervient principalement dans le cas dans le cas d'un template paramétré par plusieurs types, pour lesquels seuls certains de ces types sont spécialisés, le résultat étant un template paramétré dans les types restants. Exemple :
+
+\begin{lstlisting}
+template<typename T, typename U>
+public double Pow(T x, U y)
+{
+    return exp(y*ln(x));
+}
+
+template<typename T>
+public double Pow<T,int>(T x, int y)
+{
+    double q= (y >= 0) ? x : ((double)1)/x; //do not forget the explicit cast into double !
+    int yAbs = abs(y);
+    double r=1;
+
+    for (int j = 0 ; j < yAbs;j++)
+        r*=q;
+
+    return r;
+}
+\end{lstlisting}
+
+\section{Templating par des entiers}
+
+Il est également possible de paramétrer une fonction par autre chose qu'un type. Notamment, il est possible de paramétrer une fonction par un entier. Ces mécanismes ne seront pas détaillés cette année, mais ils sont massivement utilisés dans de nombreuses librairies professionnelles, car ils permettent des optimisations très fines, notamment via le Template Meta-Programming. Les bonnes librairies de calcul scientifique en C++ par exemple reposent toutes massivement sur ce genre d'optimisation. Nous renvoyons le lecteur intéressé par exemple à \cite{Alexandrescu}. 

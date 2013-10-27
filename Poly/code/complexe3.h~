@@ -1,0 +1,16 @@
+
+struct Complexe
+{
+    Complexe(double _reel, double _imag);
+    ~Complexe();
+
+    double reel, imag;
+    double module();
+    double getReel();
+    setReel(double _reel);
+    double getImag();
+    setImag(double _imag);
+
+};
+
+

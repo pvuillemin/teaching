@@ -1,0 +1,400 @@
+\begin{savequote}
+"Dis-moi comment tu traites les fonctions, je te dirai quel type de langage tu es." Confucius \end{savequote}
+
+\chapter{Fonctions et Scope}
+\bigskip
+
+\section{Fonctions}
+
+ Int\'eressons nous d'abord à la fonction qui
+ calcule le carr\'e d'un entier.\\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}[caption={Fonction qui calcule  le carr\'e d'un nombre.}
+                  ,label=listing:fonctionCarre,showspaces=false
+                  ,gobble=6]
+        int Square(int x)
+        {
+            return x*x;
+        }
+\end{lstlisting}\end{DDbox}
+
+Dans cette définition de fonction, nous distinguons les éléments suivants :
+
+\begin{description}
+    \item[int Square] : Nom de la fonction, qui renvoie un
+    \emph{int} (Entier)
+    \item[int x] : param\`etre de la fonction, de type \emph{int}
+        (Entier)
+    \item[return x*x] : valeur de retour de la fonction
+\end{description}
+
+\bigskip
+Nous constatons plusieurs choses :
+
+\begin{itemize}
+
+\item Une fonction s'\'ecrit comme une fonction math\'ematique : elle prend en
+	argument des param\`etres, et renvoie une valeur, \'egalement typ\'ee\footnote{La comparaison s'arrête là, et on ne saurait trop mettre en garde notre public venant de math spé contre la tentation certes naturelle de résumer l'informatique à un appel de fonctions mathématiques, et les boucles for à des $\sum$. Nous y reviendrons amplement, notamment quand nous introduirons l'objet.}.
+
+\item Le d\'ebut et la fin de la fonction sont indiqu\'es par des accolades ouvrantes et fermantes.
+
+\item Les lignes d'instructions sont termin\'ees par un point-virgule (;).
+\end{itemize}
+
+\subsection{Prototypes des fonctions}
+Une fonction est d\'eclar\'ee en C++ de la mani\`ere suivante:\\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}[caption=D\'eclaration d'une fonction]
+TypeDeRetour Nom(typeParam1 nomParam1, typeParam2 nomParam2, ...)
+{
+    /* Code */
+    return someValue;
+}
+\end{lstlisting}\end{DDbox}
+
+\bigskip
+\begin{warning}
+Comme pour les noms de variables, les noms des fonctions tiennent compte de la casse (c'est à dire des majuscules et des minuscules).
+\end{warning}
+
+\begin{habitudes}[Conventions de nommages]
+	Il est important - faute de quoi on finit par s'y perdre - de d\'ecider de conventions de nommage des variables et fonctions, et de s'y tenir. Deux styles sont couramment utilis\'es :\\
+
+	\begin{DDbox}{\linewidth}\begin{lstlisting}
+		int monNomDeVariableTropLong;
+	\end{lstlisting}\end{DDbox}
+	et \\
+
+	\begin{DDbox}{\linewidth}\begin{lstlisting}
+		int mon_nom_de_variable_trop_long;
+	\end{lstlisting}\end{DDbox}
+	Peu importe celui que vous choisissez, l'important est de ne pas en changer au sein d'un même projet. Nous nous fixons le premier style dans la suite de ce document.
+\end{habitudes}
+
+Dans le cas particulier o\`u la fonction ne renvoie rien (une
+\keyword{sub} en VBA), son type de retour est \keyword{void}. Nous en
+verrons un exemple un peu plus tard.
+
+\begin{habitudes}[Du bon usage des fonctions]
+Une fonction doit remplir au plus un objectif. Il faut faire des fonctions courtes, dont l'intégralité du code tient de préférence sur un écran. Si vous vous retrouvez face à des monstres de 100 lignes de code, c'est très probablement que vous avez fait une erreur de design.
+\end{habitudes}
+
+\subsection{La fonction \texttt{main}}
+
+Lorsque vous créez un nouveau projet, nous pouvez choisir de créer une application console (.exe) ou une bibliothèque de fonctions (.dll). La bibliothèque de fonctions n'a vocation qu'à être appelée par un code extérieur.\\
+
+Si vous créez une application console, il est nécessaire de préciser le point d'entrée de votre programme, c'est à dire la première fonction à appeler lorsque vous lancerez votre programme. Cette fonction porte par convention le nom de \functionname{main}. Cela a une implication importante, qui est
+qu'\underline{\emph{il ne peut y avoir qu'une seule fonction}} \functionname{main} dans votre programme. Réciproquement, en l'absence de fonction main dans une application console, \textbf{l'édition des liens échouera}.\\
+
+La fonction main accepte plusieurs prototypes : son type de retour est généralement void, mais il peut être entier (on peut utiliser ce type de retour entier pour retourner un code d'erreur si l'exécution du code a déclenché des erreurs). La fonction main peut également prendre des arguments :\\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}
+int main(int argc, char* argv[])
+{
+	return 0;
+}
+\end{lstlisting}\end{DDbox}
+
+Ces arguments, spécifiés par l'utilisateur au lancement du programme en mode ligne de commande, permettent d'intéragir avec le programme. Par exemple, lorsque sous Linux nous utilisons le programme qui permet de lister tous les fichiers du répertoire courant, nous appelons le programme ls dans l'invite de commande, mais nous pouvons également utiliser ls -l, où la chaîne de caractères -l est passée au programme via la fonction main comme argument.\\
+
+Sauf si vous souhaitez qu'il en soit autrement, nous vous conseillons d'adopter le prototype le plus simple\footnote{attention cependant, ce prototype du main est parfois incompatible avec certaines librairies comme SDL...}:\\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}
+void main()
+{
+	//code
+}
+\end{lstlisting}\end{DDbox}
+
+\section{Déclaration et définition de fonctions}
+
+Nous allons utiliser la fonction Square définie ci-dessus dans notre fonction main. Dans un projet vide, nous ajoutons le fichier main.cpp reproduit ci-dessous et compilons :\\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}
+
+//Main.cpp
+
+int Square(int x)
+{
+	return x*x;
+}
+
+void main()
+{
+	int a = 3;
+	int b = Square(a);
+}
+\end{lstlisting}\end{DDbox}
+
+Lorsque nous inversons l'ordre des définitions des deux méthodes, nous obtenons une erreur de compilation :\\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}
+
+//Main.cpp
+
+void main()
+{
+	int a = 3;
+	int b = Square(a);
+}
+
+int Square(int x)
+{
+	return x*x;
+}
+
+\end{lstlisting}\end{DDbox}
+
+erreur C3861: "Square" : identificateur introuvable.\\
+
+Le compilateur commence par compiler la fonction main, et il y trouve un appel à la fonction Square. Comme au moment où il compile main, il ne "connait" pas encore la fonction Square, il renvoie une erreur de compilation. Pour informer le compilateur de l'existence de la fonction Square, il est nécessaire de la déclarer avant la fonction main, comme dans l'exemple suivant :\\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}
+
+//Main.cpp
+
+int Square(int); //declaration de Square
+
+void main()
+{
+	int a = 3;
+	int b = Square(a);
+}
+
+int Square(int x) //definition de Square
+{
+	return x*x;
+}
+
+\end{lstlisting}\end{DDbox}
+
+Pour ne pas nuire à la lisibilité du code, nous allons isoler la déclaration de la fonction Square dans un fichier header (.h), que nous ajoutons à notre projet. Nous obtenons donc dans main.h :\\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}
+
+//Main.h
+
+int Square(int);
+\end{lstlisting}\end{DDbox}
+
+et dans main.cpp :\\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}
+
+//Main.cpp
+#include "main.h"
+
+void main()
+{
+	int a = 3;
+	int b = Square(a);
+}
+
+int Square(int x)
+{
+	return x*x;
+}
+
+\end{lstlisting}\end{DDbox}
+
+Nous retrouvons alors la séparation déclarations dans les fichiers headers et définitions dans les fichiers .cpp comme annoncée dans le chapitre interpréteur/compilateur.\\
+
+Le lecteur déjà initié au C\# ou au Java se demandera naturellement pourquoi il est nécessaire de déclarer les méthodes avant de les définir. C'est principalement pour des raisons historiques; c'est la façon dont on codait en C, et par souci de compatibilité, c'est la manière de faire pour le C++. Il y a d'autres raisons qui peuvent être avancées, notamment l'accélération des temps de compilation, le fait de pouvoir faire référence à du code dont vous n'avez que la déclaration et pas la définition, ... La vraie raison est qu'à l'époque du C, on ne savait pas encore faire autrement, et les techniques de compilation se sont infiniment améliorées depuis cette époque.
+
+\section{Scopes des variables}
+
+Considérons l'exemple suivant :\\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}
+double SquareError(double x, double y)
+{
+    double s = x-y;
+    return s*s;
+}
+\end{lstlisting}\end{DDbox}
+
+Dans cet exemple, la variable s est déclarée dans la fonction SquareError et sert de résultat intermédiaire. Lorsque nous commençons à exécuter cette fonction, la variable s est créée, puis elle stocke le résultat de x-y. Cette variable s est une variable muette, c'est à dire qu'elle sert à définir le sens de la fonction SquareError, mais qu'elle ne possède pas de sens en dehors, tout comme la variable k sert à définir la valeur de la fonction f dans $f(n) = \sum_{k=1}^{n}\frac{1}{k^2}$. Pour des raisons d'espace et de performance, les variables qui ne sont plus utilisées sont détruites, et l'emplacement mémoire qu'elles utilisaient est réalloué dès que nécessaire. On peut donc dire que la durée de vie (scope) d'une variable déclarée dans une fonction s'étend de la ligne où elle est déclarée jusqu'à la fin de la fonction. En dehors de cette fonction, l'identifiant s n'est pas associé à une variable, et nous pouvons réutiliser cet identifiant pour lui donner un autre sens.\\
+
+Considérons l'exemple suivant :\\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}
+
+#include <math.h>
+
+double SquareError(double x, double y)
+{
+	double s = x-y;
+	return s*s;
+}
+
+double ManhattanError(double x, double y)
+{
+	double s = x-y;
+	return abs(s);
+}
+
+void main()
+{
+	double a = 2.0;
+	double b = 1;
+	double c = 3.0;
+	double d = SquareError(a,b);
+	double e = ManhattanError(a,b);
+}
+
+\end{lstlisting}\end{DDbox}
+
+Dans cet exemple, les valeurs a,b,c,d,e ont pour scope la fonction main. Une variable s est déclarée dans SquareError, et elle est détruite à la fin de la fonction. L'identifiant s est "recyclé" dans la fonction ManhattanError, et la variable s est également détruite à la fin de cette fonction. Le double usage de l'identifiant s ne pose pas de problème au compilateur, qui comprend que la variable est "muette" dans les deux cas.\\
+
+Notez que pour utiliser la fonction valeur absolue, fonction standard du langage, nous devons utiliser la librairie "math", dont les méthodes sont déclarées dans le fichier header math.h qui est stocké dans le répertoire de Visual Studio. Pour utiliser cette librairie, nous utilisons donc un include, mais substituons les symboles < et > en lieu et place des guillemets "" pour spécifier au compilateur que ce fichier math.h appartient à la bibliothèque standard et n'est pas un fichier de votre propre cru.\\
+
+\section{Passage d'arguments}
+
+Considérons une méthode Increment qui prenne un entier et l'incrémente. Nous voulons (à titre purement illustratif) que cette méthode ne retourne pas la valeur incrémentée, mais qu'elle modifie directement la valeur de l'argument qui lui est passé.
+
+\subsection{Passage d'argument par valeur}
+
+Une première idée serait d'implémententer la fonction Increment comme suit :\\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}
+void Increment1(unsigned int a)
+{
+    a++;
+}
+
+void main()
+{
+    unsigned int i = 2;
+    Increment1(i);
+    unsigned int b = i;
+}
+\end{lstlisting}\end{DDbox}
+
+Si nous ex\'ecutons ce dernier code \footnote{Il est fortement recommand\'e
+de le faire pour vous en persuader.}, nous constatons que lorsque nous appelons cette fonction dans notre main, nous n'obtenons pas les résultats attendus, la variable b prenant la valeur 2. La
+raison \`a cela est que c'est une \emph{copie} de \texttt{i} qui est pass\'ee
+\`a la fonction (copie désignée par le symbole a), et non la variable i "elle-m\^eme" : le compilateur C++ va par défaut réaliser des copies des arguments que nous donnons à une fonction. Dans l'exemple précédent, une variable i est créée dans la fonction main. Lorsque nous appelons la fonction Increment1, une variable a est créée et le compilateur lui affecte la valeur de i. Cette valeur a est incrémentée dans la fonction Increment1, puis est détruite à la fin de la fonction. Lorsque nous retournons dans la fonction main après exécution de la fonction Increment1, nous avons donc incrémenté une variable a, que nous avons détruite à la fin de la fonction Increment1 et nous disposons maintenant de la variable i dont la valeur n'a jamais été modifiée. \\
+
+Exemple d'allocation mémoire avant d'entrer dans la fonction Increment1 :
+
+\begin{center}
+\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|l|l|l}
+Case m\'emoire & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 \\
+\hline
+Nom &  &  & i  & i  & i & i &  & &  & & & & \\
+\hline
+Valeur &  &  & 0100... & 000... & 00...  & 000... &  &  &  &  &  &  & \\
+\end{tabular}
+\end{center}
+
+En entrant dans la fonction Increment1 :
+
+\begin{center}
+\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|l}
+Case m\'emoire & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10  \\
+\hline
+Nom &  &  & i  & i  & i & i &  & a & a & a & a \\
+\hline
+Valeur &  &  & 0100... & 000... & 00...  & 000.. &  &0100... & 000... & 00...  & 000..  \\
+\end{tabular}
+\end{center}
+
+Juste avant de sortir de la fonction Increment1 :
+
+\begin{center}
+\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|l}
+Case m\'emoire & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10  \\
+\hline
+Nom &  &  & i  & i  & i & i &  & a & a & a & a \\
+\hline
+Valeur &  &  & 0100... & 000... & 00...  & 000.. & & 1100... & 000... & 00...  & 000.. \\
+\end{tabular}
+\end{center}
+
+De retour dans le main après appel à Increment1 :
+
+\begin{center}
+\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|l}
+Case m\'emoire & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10  \\
+\hline
+Nom &  &  & i  & i  & i & i &  & &  & &  \\
+\hline
+Valeur &  &  & 0100... & 000... & 00...  & 000.. &  &  &  &  &  \\
+\end{tabular}
+\end{center}
+
+Il nous faut également spécifier en C++ au compilateur que nous ne voulons pas qu'il travaille avec une copie de la variable i, mais bien avec la variable i elle-même.
+
+\subsection{Passage d'argument par pointeur}
+
+Reprenons l'exemple précédent avec des pointeurs :\\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}
+void Increment2(int* p)
+{
+    (*p)++;
+}
+
+void main()
+{
+    int i = 2;
+    int* pi = &n;
+    Increment2(pi);
+    int b = i;
+}
+\end{lstlisting}\end{DDbox}
+
+Cette fois-ci, nous avons donné en argument non pas la variable i, mais un pointeur vers cette variable i via la variable pointeur pi. Le compilateur va créer une copie de la variable pi, p, qui prendra la même valeur que pi, c'est à dire qui pointera sur i également. Lorsque nous exécutons le code de la fonction Increment2, nous accédons donc bien à l'adresse mémoire de la variable i, qui est effectivement modifiée.
+
+\subsection{Passage d'argument par référence}
+Le C++ (à la différence du C), propose un sucre syntaxique pour abstraire la manipulation de pointeur : c'est le passage par référence. Plus pr\'ecis\'ement, il existe un \'equivalent du \texttt{ByRef} de Visual
+ Basic, qui est le signe \&. Lorsque nous passons une valeur par référence, nous adoptons la syntaxe du passage par valeur (au symbole \& prêt) mais le compilateur va interpréter ceci comme un passage par pointeur. En voici un exemple :\\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}
+void Increment3(int& a)
+{
+    a++;
+}
+void main()
+{
+    int a = 2;
+    Increment3(a);
+    int b = a;
+}
+\end{lstlisting}\end{DDbox}
+
+Nous obtenons bien une valeur de 3 pour la variable b à la fin du main.\\
+
+\begin{warning}
+Il est important de noter que
+ l'emploi du signe \& \`a c\^ot\'e d'une d\'eclaration de variable n'a
+ \emph{pas} le même sens que celui de l'op\'erateur qui r\'ecup\`ere l'adresse
+ m\'emoire d'un objet. Il y a donc 2 sens différents à la fois pour les opérateurs \& et *.\\
+\end{warning}
+
+Il y a deux raisons pour lesquelles nous pouvons souhaiter passer un argument par référence :
+\begin{itemize}
+\item La première, comme nous venons de le voir, pour modifier réellement la valeur de l'argument en dehors de la fonction appelée.
+\item La deuxième, pour éviter une copie (copie qui aurait des conséquences en termes de coût et de sens).
+\end{itemize}
+
+Dans le deuxième cas, puisque c'est vraiment l'objet et non pas une copie de lui-même qui est passé à la fonction, la fonction pourrait donc modifier par inadvertance l'objet donné en argument. Nous souhaiterions parfois pouvoir interdire la modification de l'objet manipulé, par mesure de sécurité, lorsque celui-ci est donné en argument par référence. Le C++ permet de faire ceci en précisant au niveau de l'argument de la fonction que celui-ci est constant (immutable) et qu'il ne devra pas être modifié :\\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}
+void WidgetFunction(const int& a)
+{
+    //Do something
+}
+\end{lstlisting}\end{DDbox}
+
+Dans notre cas d'incrémentation, nous ne souhaitons bien évidemment pas que la fonction Increment3 utilise un argument immutable comme dans l'exemple précédent, puisque précisément le but de la fonction est de modifier l'argument. Si cependant nous nous y essayions, le compilateur retournerait une erreur, car il est capable de détecter statiquement (c'est à dire à la compilation et non à l'exécution) que le code essaye de modifier une variable définie comme immutable.
+
+\section{Effets de bord}
+
+Le fait qu'une fonction agisse non pas par sa valeur de retour mais par le fait qu'elle modifie un de ses arguments, comme c'était le cas dans notre méthode Increment3 au dessus, est appelé effet de bord. En règle générale, les effets de bord sont peu intuitifs et doivent être utilisés avec circonspection.
+
+\begin{habitudes}[Méthodes à effet de bord]
+
+Lorsqu'une méthode a des effets de bord, il est de bon goût que cette méthode n'ait pas de type de retour. Ainsi, il est beaucoup plus aisé au relecteur du code de deviner que la méthode va agir par effet de bord. Inversement, une méthode qui a un type de retour n'est pas sensée avoir des effets de bord sur ses arguments.
+
+\end{habitudes}

@@ -1,0 +1,3 @@
+mv %1 temp___
+mv %2 %1
+mv temp___ %2

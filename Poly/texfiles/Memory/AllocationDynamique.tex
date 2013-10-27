@@ -1,0 +1,312 @@
+\chapter{Allocation dynamique }
+
+Ce chapitre sera un peu plus th\'eorique que les autres, mais il expose des
+notions indispensables \`a la bonne compr\'ehension du C++. Il est donc
+\emph{important}\footnote{Il faut également le relire jusqu'\`a ce qu'il soit compris.}
+et sera consacr\'e aux tableaux, \`a l'allocation dynamique de m\'emoire et aux
+pointeurs.
+
+\section{Tableaux}
+
+Il est possible en C++ de d\'eclarer un \index{tableau}tableau de variables. Cela se fait de
+la mani\`ere suivante :
+
+\begin{lstlisting}[caption=D\'eclaration d'un tableau]
+Type arrayName[size];
+\end{lstlisting}
+
+Par exemple,
+
+\begin{lstlisting}
+double someArray[ 50 ];
+\end{lstlisting}
+permet de d\'eclarer un tableau de 50 nombres d\'ecimaux en double pr\'ecision.\\
+
+On acc\`ede alors aux \'el\'ements du tableau \`a l'aide de l'op\'erateur \texttt{[ ]}. Pour cr\'eer un tableau
+de 10 \'el\'ements et y ranger les carr\'es des entiers de 1 \`a 10, on \'ecrirait:
+\begin{lstlisting}[caption=Utilisation d'un tableau]
+double someArray[ 10 ];
+
+for( int i = 0 ; i < 10 ; i++)
+{
+    tableau[i]=(i+1)*(i+1); //Le tableau commence a l'indice 0
+}
+\end{lstlisting}
+
+La syntaxe \'equivalente en Python ou en VBA serait :
+\begin{center}%
+    \begin{minipage}{0.45\linewidth}
+       \begin{center}\emph{Python}\end{center}
+\begin{lstlisting}[language=python]
+#c'est une liste et
+#non un tableau
+tableau = []
+
+for i in range(1, 11):
+	tableau.append(i * i)
+\end{lstlisting}
+    \end{minipage}
+    \qquad
+    \begin{minipage}{0.45\linewidth}%
+    \begin{center}\emph{VBA}\end{center}
+\begin{lstlisting}[language=VBScript]
+dim i as Integer
+dim tableau(10) as Integer
+
+for i=1 to 10
+    tableau(i)=i*i
+next i
+\end{lstlisting}
+    \end{minipage}
+\end{center}
+
+\section{Allocation dynamique }
+Supposons \`a pr\'esent que nous souhaitions \'ecrire un programme qui demande \`a l'utilisateur de rentrer un nombre $n$.
+Le programme en question demande ensuite \`a l'utilisateur de rentrer $n$ nombres successifs, pour ensuite
+tous les r\'eafficher.
+\subsection{Allocation dynamique}
+Spontan\'ement, nous voudrions cr\'eer un tableau de taille $n$ au moyen du code suivant :
+
+\includecodecaption{tableautaillevariableerreur.cpp}{Tableau de taille variable}
+
+Malheureusement, ce code est erronn\'e. En effet, comme nous l'avons vu
+pr\'ec\'edemment, chaque fois que l'on d\'eclare une variable (ou un tableau),
+le compilateur C++ r\'eserve des cases m\'emoires. Mais pour les r\'eserver
+correctement, il faut qu'il sache \emph{\`a la compilation}  combien de case il
+doit r\'eserver, \emph{ce qui n'est pas le cas ici}. Il nous faut donc trouver une
+autre solution.\\
+
+Le probl\`eme se pose en ces termes : comment dire au compilateur " Je veux
+r\'eserver n cases m\'emoires, \emph{pendant l'ex\'ecution et non pas à la compilation} du programme " ? Il
+existe une fonctionalité\footnote{Pour \^etre plus pr\'ecis, il s'agit en fait d'un op\'erateur d'un genre un peu particulier.} en C++ appel\'ee \texttt{new}, qui effectue pr\'ecis\'ement
+cette op\'eration, et renvoie l'adresse (donc \emph{un pointeur}) du d\'ebut de
+la zone m\'emoire ainsi r\'eserv\'ee. La syntaxe (dans notre cas) est la
+suivante :
+
+\begin{lstlisting}[caption=Exemple d' appel  \`a \texttt{new}]
+/*La ligne suivante demande 10 entiers en memoire*/
+int* someArray = NULL;
+someArray = new int [10];
+\end{lstlisting}
+
+Si nous \'etudions cette ligne, nous pouvons faire deux remarques :
+
+\begin{enumerate}
+\item \texttt{new} renvoie un pointeur du type demand\'e.
+\item \texttt{new} prend en param\`etre la taille du bloc \`a demander.
+\end{enumerate}
+
+\subsection{Arithm\'etique des pointeurs}
+
+Une fois la m\'emoire r\'eserv\'ee, nous voulons pouvoir acc\'eder au bloc
+m\'emoire en question. Le langage C++ permet de traiter la zone m\'emoire ainsi
+r\'eserv\'ee exactement comme un tableau standard. Par exemple, le code suivant
+r\'ealise ce que nous voulions faire au d\'ebut (rentrer des nombres, les
+stocker, et les r\'eafficher) :
+
+\includecode{tableautaillevariable.cpp}
+
+Cependant, que se passe-t-il en r\'ealit\'e? Lorsque l'on \'ecrit
+\begin{lstlisting}
+someArray[i]=30;
+\end{lstlisting}
+
+c'est en fait l'instruction suivante qui est ex\'ecut\'ee :
+\begin{lstlisting}
+*(someArray + i)=30;
+\end{lstlisting}
+
+En d'autre termes, someArray contient bien l'adresse du d\'ebut du bloc
+m\'emoire. En ajoutant i, on se d\'eplace \footnote{Attention! Il y a ici une
+subtilit\'e. Saurez-vous la voir?} \`a l'adresse du i-\`eme \'el\'ement, dont
+on modifie la valeur \`a l'aide de l'op\'erateur de déréférentiation \texttt{*}. Le sch\'ema
+ci-dessous repr\'esente la situation en m\'emoire lorsque l'on a un tableau de
+taille 5 :
+
+\begin{center}
+\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l}
+Case m\'emoire & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
+\hline
+Nom &  &  & someArray &  & \multicolumn{5}{c|}{m\'emoire r\'eserv\'ee pour le tableau} & \multicolumn{1}{l|}{} \\
+\hline
+Valeur &  &  & case mémoire 4 &  &  &  &  &  &  &  \\
+\end{tabular}
+\end{center}
+
+Etudions le d\'eroulement du code suivant :
+\begin{lstlisting}
+int* tableau;
+
+/*etape 1*/
+tableau = new int [ 5 ];
+
+/*etape 2*/
+tableau[2] = 37;
+
+/*etape 3*/
+*(tableau + 2) = 42;
+\end{lstlisting}
+
+Apr\`es l'\'etape 1, nous sommes dans la situation ci-dessous :
+
+\begin{center}
+\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l}
+Case m\'emoire & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
+\hline
+Nom &  &  & tableau &  & \multicolumn{5}{c|}{m\'emoire r\'eserv\'ee pour tableau} & \multicolumn{1}{l|}{} \\
+\hline
+Valeur &  &  & Case mémoire 4 &  &  &  &  &  &  &  \\
+\end{tabular}
+\end{center}
+
+La m\'emoire r\'eserv\'ee n'est \emph{pas} initialis\'ee \`a 0 (ou tout autre valeur).
+
+Apr\`es l'\'etape 2,
+\begin{center}
+\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l}
+Case m\'emoire & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
+\hline
+Nom &  &  & someArray &  & \multicolumn{5}{c|}{m\'emoire r\'eserv\'ee pour tableau} & \multicolumn{1}{l|}{} \\
+\hline
+Valeur &  &  & Case mémoire 4 &  &  &  & 37  &  &  &  \\
+\end{tabular}
+\end{center}
+
+le troisi\`eme \'el\'ement du tableau a \'et\'e modifi\'e.
+
+Apr\`es l'\'etape 3,
+\begin{center}
+\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l}
+Case m\'emoire & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
+\hline
+Nom &  &  & someArray &  & \multicolumn{5}{c|}{m\'emoire r\'eserv\'ee pour tableau} & \multicolumn{1}{l|}{} \\
+\hline
+Valeur &  &  & Case mémoire 4 &  &  &  &  42 &  &  &  \\
+\end{tabular}
+\end{center}
+
+le m\^eme \'el\'ement a \'et\'e modifi\'e, mais en \'ecrivant explicitement o\`u il se trouvait en m\'emoire.
+
+
+Il est int\'eressant de remarquer que \texttt{*tableau = *(tableau + 0) =
+tableau[0]} correspond au premier \'el\'ement du tableau. C'est une des raisons pour
+lesquelles les tableaux en C++ commencent \`a l'indice 0 et non 1.\\
+
+
+Une subtilit\'e s'est cependant gliss\'ee ici, qui a \'et\'e pass\'ee sous
+silence pour des raisons de simplicit\'e. En effet, suivant son type, une
+variable n'occupe pas le m\^eme nombre de cases m\'emoires : un \texttt{int} va
+g\'en\'eralement\footnote{Le cas des \texttt{int} est un peu particulier,
+puisqu'il d\'epend du type de processeur/compilateur utilis\'e. Sur les processeurs 32 bits,
+ce sera 32 bits soit 4 octets (cases).} occuper 4 cases, un \texttt{char}
+1 case, et un \texttt{double} 8 cases :
+
+\begin{center}
+\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|l|l|l}
+Case m\'emoire & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 \\
+\hline
+Nom & \multicolumn{1}{c|}{char c} & \multicolumn{4}{c|}{int n} & \multicolumn{8}{c|}{double d} \\
+\hline
+Valeur &  &  &  &  &  &  &  &  &  &  &  &  &  \\
+\end{tabular}
+\end{center}
+
+Pourquoi, lorsque l'on \'ecrit
+\begin{lstlisting}
+*(tableau + 2) = 42;
+\end{lstlisting}
+
+se trouve-t-on \`a l'adresse \texttt{tableau + 2* sizeof(int)\footnote{\functionname{sizeof} est une fonction particuli\`ere qui renvoie la taille en m\'emoire (le nombre de cases) d'une variable.}}  et non
+\texttt{tableau + 2} (c'est à dire au milieu d'un entier)? Pour des raisons de confort,
+lorsque l'on manipule des pointeurs, le compilateur C++ ajoute automatiquement le
+\texttt{sizeof} n\'ecessaire. Cette arithm\'etique un peu particuli\`ere -on
+ajoute 2 \emph{en apparence} - porte le nom d'arithm\'etique des pointeurs.
+
+\subsection{Nettoyage de la m\'emoire}
+
+Nous savons \`a pr\'esent allouer de la m\'emoire selon nos besoins, en cours
+d'ex\'ecution du programme. Qu'advient-il de cette m\'emoire allou\'ee  lorsque notre
+code ne l'utilise plus? La r\'eponse est simple : elle reste allou\'ee. Pour
+cela, nous devons comprendre ce qui se passe lorsque nous allouons de la
+m\'emoire.\\
+
+L'OS (syst\`eme d'exploitation) d'un ordinateur
+est un "programme" qui tourne en permanence, et qui se charge (entre autres) de
+faire cohabiter les diff\'erents programmes tournant simultan\'ement les uns
+avec les autres. En particulier, lui seul dispose d'un contr\^ole total sur la
+m\'emoire de l'ordinateur. En pratique, chaque fois qu'un programme  demande de
+la m\'emoire au moyen d'une instruction \texttt{new} ou similaire, c'est en
+fait au syst\`eme d'exploitation qu'il la demande. Celui ci r\'eserve alors une
+zone, et la marque comme appartenant au programme demandant la m\'emoire.\\
+
+Pendant l'ex\'ecution du programme, l'OS n'a \emph{aucune} raison de d\'esallouer la
+m\'emoire qui a \'et\'e demand\'ee, et ce quelle que soit la situation. On
+pourrait tr\`es bien imaginer des cas dans lesquels un utilisateur a lanc\'e
+une trentaine de programme simultan\'ement qui consomment tous beaucoup de
+m\'emoire, et o\`u l'OS aurait int\'er\^et, voire besoin de lib\'erer de la
+m\'emoire. Cependant, il ne le fera jamais. Certains langages (Java, Python,
+Pascal, VBA, etc.) fournissent un  m\'ecanisme de nettoyage automatique
+\footnote{appel\'e ramasse-miette, ou \textit{garbage collection}} de la mémoire qui n'est plus utilisée,
+mais ce n'est pas le cas du C++ \footnote{Au moins à notre niveau}.\\
+
+Afin d'\'eviter ce genre de situation, la mémoire allouée dans un programme doit \emph{toujours} être lib\'erée dès qu'elle n'est plus utilisée. Cela se fait
+au moyen de l'instruction \texttt{delete}. Cette instruction prend deux formes:
+
+\begin{itemize}
+	\item Si la mémoire allouée était destinée à un tableau, elle doit être désallouée avec l'opérateur delete[] :
+\begin{lstlisting}
+delete[] someArray;
+\end{lstlisting}
+	\item Si la mémoire allouée était destinée à une variable, on utilisera une forme sans crochet:
+\begin{lstlisting}
+delete pSomeElement;
+\end{lstlisting}
+\end{itemize}
+
+\includecodecaption{newdelete.cpp}{Tableau de taille variable avec nettoyage de la m\'emoire}
+
+\begin{habitudes}[\texttt{new}/\texttt{delete}]
+	
+\`A chaque fois que l'on \'ecrit un \functionname{new}, il faut \'ecrire immédiatement le
+\functionname{delete} associ\'e. Cela permet d'\^etre certain de ne pas
+l'oublier, et donc d'\'eviter bien des probl\`emes plus tard.
+
+\end{habitudes}
+
+\section{Quelques pr\'ecautions}
+
+Ce chapitre est sans doute le plus difficile \`a comprendre mais le plus
+important de ce cours : une fois compris, l'ensemble des notions abord\'ees par
+la suite para\^itront simple. Le langage C++ est un langage qui peut-\^etre consid\'er\'e comme de \emph{bas-niveau}
+-par opposition \`a des langages comme Java, Python, Pascal, VBA, etc., qui
+sont dits de haut niveau- dans la mesure o\`u il ne dissimule pas au
+programmeur ce qui se passe dans l'ordinateur. Cela a des avantages (contr\^ole
+tr\`es fin sur le d\'eroulement du programme, optimisations plus faciles \`a
+effectuer pour le compilateur, meilleures performances \footnote{Ceci est de plus en plus discutable, cf les derniers benchmarks http://shootout.alioth.debian.org/, il faut être très prudent lorsque l'on parle de performances}), et des inconv\'enients
+(obligation de penser "comme la machine", plus grande difficult\'e \`a \'ecrire
+du code robuste, augmentation du temps de d\'eveloppement)
+
+Il est important de noter que plus de 50\% des bogues rencontr\'es lors du d\'eveloppement d'application sont dus \`a :
+\begin{itemize}
+\item des d\'epassements d'indices dans des tableaux
+\item de la m\'emoire lib\'er\'ee plusieurs fois
+\item des pointeurs non initialis\'es ou pointant sur des zones m\'emoires non-initialis\'ees.
+\end{itemize}
+Il convient donc, lorsque l'on \'ecrit du code manipulant de la m\'emoire, de le faire avec la plus grande prudence.\\
+
+Récapitulatif :
+
+\begin{itemize}
+\item Un tableau est d\'eclar\'e en C++ de la mani\`ere suivante:
+\begin{lstlisting}
+typeDeVariable nomTableau[nbElements];
+\end{lstlisting}
+\item Si l'on a besoin d'un tableau de taille variable, ou inconnue \`a la compilation, il faut allouer dynamiquement de la m\'emoire, c'est-\`a-dire la demander
+au syst\`eme au moyen de l'opérateur \functionname{new}. Celle-ci renvoie un pointeur sur une zone m\'emoire, qui peut \^etre manipul\'ee comme un tableau.
+Par exemple,
+\begin{lstlisting}
+int* tableau = new int[40];
+tableau[27] = 42;
+\end{lstlisting}
+\item Tout objet (tableau ou non) construit via l'opérateur new doit être détruit manuellement via l'opérateur delete (ou delete[] dans le cas d'un tableau).
+\end{itemize} 

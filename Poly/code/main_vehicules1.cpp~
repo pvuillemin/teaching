@@ -1,0 +1,22 @@
+#include <iostream.h>
+
+void affichePrixVehicules(
+		Velo *listeVelos, 
+		int nVelos, 
+		Voiture* listeVoiture, 
+		int nVoitures)
+{
+    int i;
+
+    for(i = 0; i < nVelos; i++)
+        cout << listeVelos[i].getPrix();
+    for(i = 0; i < nVoitures; i++)
+        cout << listeVoitures[i].getPrix();
+}
+
+int main()
+{
+	return 0;
+}
+
+

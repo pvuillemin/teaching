@@ -1,0 +1,125 @@
+\begin{thebibliography}{10}
+
+\bibitem{MetaProgramming}
+D.~Abrahams and A.~Gurtovoy.
+\newblock {\em C++ Template Metaprogramming: Concepts, Tools, and Techniques
+  from Boost and Beyond (C++ in Depth Series)}.
+\newblock Addison-Wesley Professional, 2004.
+
+\bibitem{DragonBook}
+A.~Aho, M.~Lam, R.~Sethi, and J.~Ullman.
+\newblock {\em Compilers: Principles, Techniques, and Tools (2nd Edition)}.
+\newblock Addison-Wesley Longman Publishing Co., Inc., Boston, MA, USA, 2006.
+
+\bibitem{Alexandrescu}
+Andrei Alexandrescu.
+\newblock {\em {Modern C++ Design: Generic Programming and Design Patterns
+  Applied}}.
+\newblock {Addison-Wesley Professional}, February 2001.
+
+\bibitem{ThreadsCannotBeImplementedAsALibrary}
+H.J. Boehm.
+\newblock Threads cannot be implemented as a library.
+\newblock {\em SIGPLAN Not.}, 40(6):261--268, June 2005.
+
+\bibitem{ProGit}
+S.~Chacon.
+\newblock {\em Pro Git}.
+\newblock Apress, Berkely, CA, USA, 1st edition, 2009.
+
+\bibitem{IntroAlgorithms}
+T.H. Cormen, C.E. Leiserson, R.L. Rivest, and C.~Stein.
+\newblock {\em {Introduction to Algorithms, Second Edition}}.
+\newblock The MIT Press, 2nd edition, September 2001.
+
+\bibitem{Boost2}
+R.~Demming and D.J. Duffy.
+\newblock {\em Introduction to the Boost C++ Libraries; Volume I -
+  Foundations}.
+\newblock Datasim Education BV, The Netherlands, 2010.
+
+\bibitem{Drepper}
+U.~Drepper.
+\newblock What every programmer should know about memory, 2007.
+
+\bibitem{ContinuousIntegration}
+P.~Duvall, S.~Matyas, and A.~Glover.
+\newblock {\em Continuous integration: improving software quality and reducing
+  risk}.
+\newblock Addison-Wesley Professional, first edition, 2007.
+
+\bibitem{Thinking}
+B.~Eckel.
+\newblock {\em {Thinking in C++, Volume 1: Introduction to Standard C++ (2nd
+  Edition)}}.
+\newblock {Prentice Hall}, April 2000.
+
+\bibitem{Subversion}
+B.~Fitzpatrick, B.~Collins-Sussman, and C.M. Pilato.
+\newblock {\em Gestion de projets avec Subversion}.
+\newblock O'Reilly, 2004.
+
+\bibitem{DesignPatterns}
+E.~Gamma, R.~Helm, R.~Johnson, and J.~Vlissides.
+\newblock {\em Design patterns: elements of reusable object-oriented software}.
+\newblock Addison-Wesley Longman Publishing Co., Inc., Boston, MA, USA, 1995.
+
+\bibitem{ElementsStatisticalLearning}
+T.~Hastie, R.~Tibshirani, and J.~Friedman.
+\newblock {\em {The Elements of Statistical Learning: Data Mining, Inference,
+  and Prediction}}.
+\newblock Springer, corrected edition, August 2003.
+
+\bibitem{AMP}
+M.~Herlihy and N.~Shavit.
+\newblock {\em The Art of Multiprocessor Programming}.
+\newblock Morgan Kaufmann Publishers Inc., San Francisco, CA, USA, 2008.
+
+\bibitem{Joshi}
+M.~S. Joshi.
+\newblock {\em C++ Design Patterns and Derivatives Pricing}.
+\newblock Cambridge University Press, New York, NY, USA, 2nd edition, 2008.
+
+\bibitem{CombinatorialOptimization}
+B.~Korte and J.~Vygen.
+\newblock {\em Combinatorial Optimization: Theory and Algorithms}.
+\newblock Springer Publishing Company, Incorporated, 5th edition, 2012.
+
+\bibitem{EffCpp}
+S.~Meyers.
+\newblock {\em Effective C++}.
+\newblock Addison-Wesley, 2004.
+
+\bibitem{CudaByExample}
+J.~Sanders and E.~Kandrot.
+\newblock {\em CUDA by Example: An Introduction to General-Purpose GPU
+  Programming}.
+\newblock Addison-Wesley Professional, 1st edition, 2010.
+
+\bibitem{Boost1}
+B.~Schling.
+\newblock {\em The Boost C++ Libraries}.
+\newblock XML Press, 2011.
+
+\bibitem{StackOverflow}
+J.~Spalsky and J.~Atwood.
+\newblock \url{http://www.codinghorror.com}.
+
+\bibitem{JoelOnSoftware}
+J.~Spolsky.
+\newblock {\em Joel on Software: Selected Essays}.
+\newblock APress, 2004.
+
+\bibitem{MoreJoel}
+J.~Spolsky.
+\newblock {\em More Joel on Software: Further Thoughts on Diverse and
+  Occasionally Related Matters That Will Prove of Interest to Software
+  Developers, Designers, and ... Luck, Work with Them in Some Capacity}.
+\newblock Apress, Berkely, CA, USA, 1 edition, 2008.
+
+\bibitem{CppIntro}
+B.~Stroustrup.
+\newblock {\em {The C++ Programming Language}}.
+\newblock Addison-Wesley Professional, third edition, February 2000.
+
+\end{thebibliography}
