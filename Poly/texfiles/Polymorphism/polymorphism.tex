@@ -2,7 +2,9 @@
 "When I see a bird that walks like a duck and swims like a duck and quacks like a duck, I call that bird a duck." James Whitcomb Riley.\\
 
 "One issue with duck typing is that it forces the programmer to have a much wider understanding of the code he or she is working with at any given time. In a strongly and statically typed language that uses type hierarchies and parameter type checking, it's much harder to supply an unexpected object type to a class. For instance, in Python, you could easily create a class called Wine, which expects a class implementing the "press" attribute as an ingredient. However, a class called Trousers might also implement the press() method. With Duck Typing, in order to prevent strange, hard-to-detect errors, the developer needs to be aware of each potential use of the method "press", even when it's conceptually unrelated to what he or she is working on.
-In essence, the problem is that, "if it walks like a duck and quacks like a duck", it could be a dragon doing a duck impersonation. You may not always want to let dragons into a pond, even if they can impersonate a duck." ?
+In essence, the problem is that, "if it walks like a duck and quacks like a duck", it could be a dragon doing a duck impersonation. You may not always want to let dragons into a pond, even if they can impersonate a duck." 
+
+\qauthor{http://en.wikipedia.org/wiki/Duck\_typing}
 
 \end{savequote}
 
@@ -17,6 +19,7 @@ Le polymorphisme est une fonctionnalité d'un langage permettant de manipuler des
 
 Nous possédons trois classes A, B, C chacune implémentant une méthode Display, de même prototype (void Display(void) par exemple), et dont le corps contient \textbf{les mêmes instructions}. Nous souhaitons implémenter une méthode f qui prenne en argument une instance d'une de ces classes, et qui appelle la méthode Display de cette instance. Nous voudrions pouvoir écrire quelquechose de la sorte :
 
+\begin{DDbox}{\linewidth}
 \begin{lstlisting}
 void main(void)
 {
@@ -33,6 +36,7 @@ void f(? instance)
     instance.Display();
 }
 \end{lstlisting}
+\end{DDbox}
 
 Sous cette forme, notre fonction f doit pouvoir prendre en argument une instance de type A, de type B, ou de type C. Il serait possible d'implémenter 3 fonctions f (surcharge de fonctions): la première qui prenne en argument une instance de type A, la seconde une instance de type B, la troisième une instance de type C. Ceci reviendrait à copier/coller du code, et c'est tout à fait inacceptable :\\
 
@@ -48,6 +52,7 @@ Nous avons vu au chapitre sur l'héritage que si nous avons deux types Derived et
 
 Dans ces conditions, nous pouvons écrire notre méthode f comme une méthode prenant en argument une instance de type Base, et qui appelle la méthode Display de cette classe :
 
+\begin{DDbox}{\linewidth}
 \begin{lstlisting}
 void main(void)
 {
@@ -64,6 +69,7 @@ void f(Base instance)
     instance.Display();
 }
 \end{lstlisting}
+\end{DDbox}
 
 \subsection{Redéfinition de méthodes dans les classes filles et slicing}
 
@@ -71,6 +77,7 @@ void f(Base instance)
 
 Reprenons l'exemple précédent. Nous souhaitons maintenant pouvoir fournir des comportements différents pour la méthode Display selon le type de l'instance appelante. Par exemple, nous pouvons souhaiter que chaque instance retourne dans la console son type. Dans cet exemple classique, il est nécessaire que la méthode Display ait un comportement qui dépende du type dans lequelle elle est appelée. Nous proposons d'étudier le code suivant :
 
+\begin{DDbox}{\linewidth}
 \begin{lstlisting}
 void Base::Display()
 {
@@ -87,9 +94,11 @@ void B::Display()
     cout << "I'm a B instance. \n";
 }
 \end{lstlisting}
+\end{DDbox}
 
 Reprenons alors le code proposé précédemment :
 
+\begin{DDbox}{\linewidth}
 \begin{lstlisting}
 void main(void)
 {
@@ -106,6 +115,7 @@ void f(Base instance)
     instance.Display();
 }
 \end{lstlisting}
+\end{DDbox}
 
 Nous obtenons la sortie suivante :
 
@@ -121,6 +131,7 @@ Ce résultat est inattendu. En effet, nous nous attendions à ce que l'appel de la
 
 Pour lutter contre ce phénomène de slicing, nous allons être plus précautionneux, et éviter le passage d'argument par copie. Nous modifions donc le prototype de notre méthode f, pour qu'elle prenne en argument non plus une instance de type Base, mais un pointeur vers une instance de type Base.
 
+\begin{DDbox}{\linewidth}
 \begin{lstlisting}
 void main(void)
 {
@@ -137,6 +148,7 @@ void f(Base* pInstance)
     pInstance->Display();
 }
 \end{lstlisting}
+\end{DDbox}
 
 La substitution que nous venons de réaliser empêche la création de nouvelles instances, qui seraient tronquées en classe Base. Cependant, la sortie que nous obtenons dans notre console reste la même :
 
@@ -146,13 +158,15 @@ I'm a Base instance.
 I'm a Base instance.
 \end{lstlisting}
 
-Que s'est-il passé ? Le premier pointeur que vous avons fourni à f (\&a), pointe bien sur une instance de type A, et non uniquement Base. Nous pouvons donc accéder à la fois par cette instance à la méthode Display de la classe mère et de la classe fille A. Pourquoi alors la méthode utilisée est-elle celle de la classe Base ?
+Que s'est-il passé ? Le premier pointeur que vous avons fourni à f (\&a), pointe bien sur une instance de type A, et non uniquement Base. Nous pouvons donc accéder à la fois par cette instance à la méthode Display de la classe mère et de la classe fille A. Pourquoi alors la méthode utilisée est-elle celle de la classe Base ?\\
+
 Il faut revenir à la manière dont fonctionne le compilateur et l'éditeur de liens. Lors de la compilation et de l'édition des liens, l'environnement détermine que la méthode f appelle une méthode définie dans l'instance pointée par le pointeur passé en argument. Ensuite, l'éditeur des liens va s'arranger pour que la bonne méthode soit appelée. Problème : l'éditeur des liens est appelé à la compilation et non à l'exécution, il ne peut donc pas faire varier son comportement en fonction de l'état de certaines variables. Comme nous passons en argument un pointeur Base*, l'environnement ne voit qu'un pointeur de type Base*. Lorsque nous donnons \&a comme argument, le compilateur réalise une conversion implicite de A* vers Base* (ce qui est demandé dans le prototype de la méthode f). L'éditeur des liens ne voit donc en \&a uniquement qu'un pointeur vers Base, il ne possède pas l'information évidente pour nous que le pointeur pointe en réalité vers une instance de type A. Que peut alors faire l'éditeur des liens ? Il dispose d'un pointeur vers Base, qui peut être un pointeur vers Base, mais aussi vers A ou vers B, mais il n'en sait rien. La seule réponse raisonnable qu'il peut alors fournir est de considérer que la méthode à appeler est celle de la classe mère, qui sera quoi qu'il arrive disponible dans l'instance pointée. \textbf{Le problème vient donc du fait que la résolution de la méthode à appeler est réalisé statiquement (compilation), alors que le type exact de la méthode qu'il faudrait appeler ne peut être connu par la machine qu'à l'exécution}.
 
 \subsection{Virtualité}
 
-Nous introduisons maintenant le mot-clef du C++ réservé à ce problème : virtual. Le mot clef virtual informe l'environnement que la résolution de la méthode Display (c'est à dire le choix de la méthode Display entre les 3 disponibles) doit être repoussé au moment de l'exécution du code, et non pas de la compilation. Ce mot clef est à placer entre l'indicateur de portée de la méthode (public, protected, private) et le type de retour de la méthode. Voici notre exemple achevé :
+Nous introduisons maintenant le mot-clef du C++ réservé à ce problème : virtual. Le mot clef virtual informe l'environnement que la résolution de la méthode Display (c'est à dire le choix de la méthode Display entre les 3 disponibles) doit être repoussé au moment de l'exécution du code, et non pas de la compilation. Ce mot clef est à placer entre l'indicateur de portée de la méthode (public, protected, private) et le type de retour de la méthode. Voici notre exemple achevé :\\
 
+\begin{DDbox}{\linewidth}
 \begin{lstlisting}
 class Base
 {
@@ -175,6 +189,7 @@ class B : public Base
     public void Display(void);
 };
 \end{lstlisting}
+\end{DDbox}
 
 Nous obtenons alors par l'appel successif proposé dans les exemples précédents :
 
@@ -188,8 +203,9 @@ Conclusion : dans l'exemple précédemment traité, nous ne voulions écrire qu'une 
 
 \subsection{Virtualité Pure, classes abstraites et interfaces}
 
-Reprenons le problème du début de chapitre, avec l'éclairage du polymorphisme dynamique que nous avons déjà étudié. Nous somme dans le cadre d'un projet où nous voulons faire un jeu vidéo dans l'univers de Star Wars. Nous disposons de deux classes Wookie et MilleniumFalcon chacune implémentant une méthode void Display(void), de logiques différentes.
+Reprenons le problème du début de chapitre, avec l'éclairage du polymorphisme dynamique que nous avons déjà étudié. Nous somme dans le cadre d'un projet où nous voulons faire un jeu vidéo dans l'univers de Star Wars. Nous disposons de deux classes Wookie et MilleniumFalcon chacune implémentant une méthode void Display(void), de logiques différentes.\\
 
+\begin{DDbox}{\linewidth}
 \begin{lstlisting}
 class Wookie
 {
@@ -204,49 +220,60 @@ class MilleniumFalcon
 };
 
 \end{lstlisting}
+\end{DDbox}
 
 Pour factoriser ces deux classes et pouvoir considérer les deux classes comme d'un seul type, nous introduisons une classe Sprite, possédant également une méthode Display (virtuelle) :
 
+\begin{DDbox}{\linewidth}
 \begin{lstlisting}
 class Sprite
 {
     public virtual void Display();
 };
 \end{lstlisting}
+\end{DDbox}
 
 Pour définir la méthode Display de la classe Sprite, nous nous retrouvons face à un problème : un sprite n'a pas par défaut une manière canonique de s'afficher à l'écran. Il n'y a donc pas de sens à implémenter cette méthode pour la classe mère; nous avons besoin de l'existence de cette méthode dans la classe mère (pour signifier au compilateur que les classes filles posséderont cette méthode), mais nous n'avons pas besoin de sa logique même. Le C++ propose une solution : la méthode virtuelle pure. La syntaxe pour déclarer une méthode virtuelle comme pure est de placer à la fin de sa déclaration le signe =0.
 
+\begin{DDbox}{\linewidth}
 \begin{lstlisting}
 class Sprite
 {
     public virtual void Display()=0;
 };
 \end{lstlisting}
+\end{DDbox}
 
-Lorsqu'une méthode est déclarée comme virtuelle pure, il n'est plus nécessaire d'implémenter le corps de la fonction. Cependant, une classe possédant au moins une méthode virtuelle pure ne peut pas être instanciée : puisqu'au moins une méthode de cette classe est virtuelle pure, c'est qu'aucun sens ne peut être donné à une instance de la classe mère, qui n'est donc pas instanciable : on parle alors de classe abstraite. Dans notre cas présent, tout élément à afficher est d'un certain type, il n'y a pas d'objet à afficher qui ne soit pas wookie, ou milleniumFalcon.
+Lorsqu'une méthode est déclarée comme virtuelle pure, il n'est plus nécessaire d'implémenter le corps de la fonction. Cependant, une classe possédant au moins une méthode virtuelle pure ne peut pas être instanciée : puisqu'au moins une méthode de cette classe est virtuelle pure, c'est qu'aucun sens ne peut être donné à une instance de la classe mère, qui n'est donc pas instanciable : on parle alors de classe abstraite. Dans notre cas présent, tout élément à afficher est d'un certain type, il n'y a pas d'objet à afficher qui ne soit pas wookie, ou milleniumFalcon.\\
 
-En C++, le langage n'offre pas la possibilité de créer des interfaces, mais la création de classes abstraites les remplace souvent. En créant des classes dont certaines méthodes sont virtuelles pures, nous assurons que toute classe héritant de cette classe mère et pouvant être instanciée implémente les méthodes dont le prototype est donné dans la classe abstraite.
+En C++, le langage n'offre pas la possibilité de créer des interfaces, mais la création de classes abstraites les remplace souvent. En créant des classes dont certaines méthodes sont virtuelles pures, nous assurons que toute classe héritant de cette classe mère et pouvant être instanciée implémente les méthodes dont le prototype est donné dans la classe abstraite.\\
 
-Remarque : si une classe A possède des méthodes virtuelles pures, une classe B en héritant a deux alternatives :
+Remarque : si une classe A possède des méthodes virtuelles pures, une classe B en héritant a deux alternatives :\\
+
 \begin{enumerate}
 \item implémenter toutes les méthodes virtuelles pures de la classe A et pouvoir être instanciée
 \item ne pas implémenter toutes les méthodes virtuelles pures de la classe A, et attendre qu'une classe C hérite de B et implémente les méthodes qui ne l'étaient pas encore. Dans ce cas, seule la classe C pourra être instanciée, les classes A et B restant abstraites.
 \end{enumerate}
 
-Remarque : comme une classe abstraite ne peut pas être instanciée, si la classe A est abstraite il ne sera pas possible d'écrire :
+Remarque : comme une classe abstraite ne peut pas être instanciée, si la classe A est abstraite il ne sera pas possible d'écrire :\\
+
+\begin{DDbox}{\linewidth}
 \begin{lstlisting}
 void f(A a)
 {
 }
 \end{lstlisting}
+\end{DDbox}
 
-En effet, l'argument de f étant passé par copie, il faudrait appeler le constructeur-copie d'une classe abstraite pour l'instancier, ce qui n'est pas possible. Nous passerons donc toujours par pointeur :
+En effet, l'argument de f étant passé par copie, il faudrait appeler le constructeur-copie d'une classe abstraite pour l'instancier, ce qui n'est pas possible. Nous passerons donc toujours par pointeur :\\
 
+\begin{DDbox}{\linewidth}
 \begin{lstlisting}
 void f(A* pa)
 {
 }
 \end{lstlisting}
+\end{DDbox}
 
 \subsection{Coût de la virtualité}
 \label{section:coutVirtualite}
@@ -265,11 +292,11 @@ A chaque appel d'une méthode virtuel, le programme doit résoudre la méthode à ap
 
 Nous pouvons lire dans beaucoup de manuels que le principal défaut du polymorphisme dynamique est le coût de la résolution au run-time de la méthode exacte à appeler. Ce coût (très variable et complexe à estimer) est en général assez faible, et bien souvent négligeable devant le temps d'exécution de la méthode en elle-même, surtout lorsque la méthode appelée comporte au moins une dizaine d'instructions. Cependant, il y a un vrai défaut du polymorphisme dynamique : c'est l'impossibilité de recourir à l'inlining. Lorsque vous utilisez de la virtualité, la détermination de la méthode à appeler se faisant au run-time, il est impossible au précompilateur de recourir à l'inlining de votre méthode. Cette impossibilité d'inlining dans le cas de polymorphisme dynamique est particulièrement dommageable dans le cas de méthodes très courtes.\\
 
-Dans la vie de tous les jours, ceci s'observe régulièrement :
+Dans la vie de tous les jours, ceci s'observe régulièrement :\\
 
 \begin{enumerate}
 \item Dans le cas d'un pricer, on peut souvent lire dans des projets débutants la création d'une classe BaseOption possédant une méthode Payoff virtuelle pure, et une dizaine de classes héritant de BaseOption (EuropeanCall, AsiaticPut, LookBack, Barrier, ...) et implémentant chacune le payoff correspondant. Par l'usage de la virtualité, vous vous privez de la possibilité d'inliner ces méthodes payoff. Le gain à passer par du polymorphisme statique et de l'inlining est ici très conséquent, mais ne doit être mis en place dans un véritable projet que si contrainte de performance il y a.
-\item Dans le cas d'algorithmes de datamining, comme un programme de recherche de proches voisins (KNN) dans un jeu de données dans $\mathbb{R}^{D}$, nous pouvons être tentés d'utiliser de la virtualité pour manipuler différentes métriques : une classe BaseMetric, abstraite, et différentes classes en héritant et implémentant des métriques $L_{\infty}$, $L_{1}$,$L_{2}$ ... Là encore, dans beaucoup d'algorithmes ces calculs de métriques vont être utilisés de très nombreuses fois, pour représenter une charge importante des calculs. La virtualité est ici à proscrire.
+\item Dans le cas d'algorithmes de datamining, comme un programme de recherche de proches voisins (KNN) dans un jeu de données dans $\mathbb{R}^{D}$, nous pouvons être tentés d'utiliser de la virtualité pour manipuler différentes métriques : une classe BaseMetric, abstraite, et différentes classes en héritant et implémentant des métriques $L_{\infty}$, $L_{1}$,$L_{2}$ ... Là encore, dans beaucoup d'algorithmes ces calculs de métriques vont être utilisés de très nombreuses fois, pour représenter une charge importante des calculs. La virtualité est ici à proscrire.\footnote{Nous renvoyons le lecteur intéressé par des benchmarks sur le sujet à :\\ \url{http://matthieudurut.com/2013/06/19/cost-of-dynamic-polymorphism-in-c-the-neighbors-search-example/}}
 \end{enumerate}
 
 La virtualité étant parfois source de bugs pénibles (le lecteur peut s'imaginer les longues soirées d'hiver à traquer une méthode non déclarée comme virtuelle qui est mal appelée), certains langages récents ont choisi de mettre par défaut toutes les méthodes de toutes les classes en virtuel (c'est le cas de Java), optimisant le compilateur (ou plutôt la JVM dans le cas de Java), pour compenser partiellement cette perte de performance. D'autres langages, comme le C\#, n'ont pas fait ce choix.
@@ -278,6 +305,7 @@ La virtualité étant parfois source de bugs pénibles (le lecteur peut s'imaginer 
 
 Il est nécessaire de rendre le destructeur d'une classe de base virtuel quand celle-ci est destinée à être détruite polymorphiquement, c'est à dire dès lorsqu'un pointeur de type pointeur sur classe mère sera utilisé dans un delete pour détruire une instance de classe fille. Dans l'exemple suivant, l'appel de delete sur pB entraine l'appel du destructeur de la classe A au lieu d'appeler le destructeur de la classe B.
 
+\begin{DDbox}{\linewidth}
 \begin{lstlisting}
 class A
 {
@@ -298,11 +326,11 @@ void main()
 }
 
 \end{lstlisting}
+\end{DDbox}
 
+Une solution simple consisterait à rendre les destructeurs de chaque classe virtuels. Cependant, ce serait une erreur, tant d'un point de vue performance (cf paragraphe précédent, et notamment quand la classe en question est une petite structure de donnée destinée à être instanciée/détruite de nombreuses fois), qu'en terme de sémantique (si la classe n'a aucune classe mère et classe fille, celà n'a pas de sens d'utiliser la virtualité).\\
 
-Une solution simple consisterait à rendre les destructeurs de chaque classe virtuels. Cependant, ce serait une erreur, tant d'un point de vue performance (cf paragraphe précédent, et notamment quand la classe en question est une petite structure de donnée destinée à être instanciée/détruite de nombreuses fois), qu'en terme de sémantique (si la classe n'a aucune classe mère et classe fille, celà n'a pas de sens d'utiliser la virtualité).
-
-Nous proposons une solution communément admise :
+Nous proposons une solution communément admise :\\
 
 \begin{itemize}
 \item Toute classe ayant au moins une fonction virtuelle doit déclarer son destructeur virtuel.
@@ -319,15 +347,17 @@ L'introduction des templates a permis de résoudre le problème pré-cité d'une man
 
 \subsection{Implémentation}
 
-Nous l'avons vu, le polymorphisme dynamique vient avec un léger coût en performance, mais aussi en complexité du code : 
+Nous l'avons vu, le polymorphisme dynamique vient avec un léger coût en performance, mais aussi en complexité du code :\\
+
 \begin{itemize}
 \item Il est nécessaire d'introduire une classe mère.
 \item Toute classe impliquée doit en hériter, impliquant parfois de multiples héritages
 \item Les fonctions surchargées doivent être déclarées virtuelles dans la classe mère.
 \end{itemize}
 
-Dans le cas du polymorphisme statique, il n'est pas nécessaire de rendre le code plus complexe. Il s'agit réellement d'un essai optimiste de polymorphisme. 
+Dans le cas du polymorphisme statique, il n'est pas nécessaire de rendre le code plus complexe. Il s'agit réellement d'un essai optimiste de polymorphisme.
 
+\begin{DDbox}{\linewidth}
 \begin{lstlisting}
 
 template <class T>
@@ -356,17 +386,15 @@ int main()
     A a;
     B b;
     C c;
-    
+
     f(a); //will compile
     f(b); //will compile
     f(c); //will break compilation.
 }
 
 \end{lstlisting}
+\end{DDbox}
 
 Traditionnellement, le polymorphisme statique, pour les raisons évoquées dans la section \ref{section:coutVirtualite}, est considéré comme plus performant. Il est important cependant de bien comprendre que les questions de performances sont trop complexes pour pouvoir être résolues si naïvement. En particulier, une fonction templatée est générée autant de fois que le nombre de classes en lesquels elle est spécifiée. Cette génération multiple peut parfois accroitre significativement la taille des programmes générés, et ainsi saturer des caches de mémoire alloués aux instructions processeurs. Il n'est donc pas possible de répondre en toute généralité à cette question.
-
-\section{La Factory : un exemple de cas où seul le polymorphisme dynamique est possible}
-
 
 

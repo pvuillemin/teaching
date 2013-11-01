@@ -234,7 +234,7 @@ d\'eclarer une classe d\'eriv\'ee au moyen de trois mots cl\'es diff\'erents :
 pr\'esent, nous n'avons employ\'e que le mot cl\'e \keyword{public}. Que
 signifie-t-il pr\'ecis\'ement?\\
 
-En réalité, chacun des mots clefs (public, private ou protected) agit comme une sorte de filtre sur la visibilit\'e des membres de la classe m\`ere. Pour ce point, la manière la plus claire de définir ces différents filtres est d'en donner un exemple :\\ 
+En réalité, chacun des mots clefs (public, private ou protected) agit comme une sorte de filtre sur la visibilit\'e des membres de la classe m\`ere. Pour ce point, la manière la plus claire de définir ces différents filtres est d'en donner un exemple :\\
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}
@@ -342,7 +342,7 @@ que nous explicitons \`a pr\'esent.
 Le probl\`eme est le suivant : le champ \varname{\_color} a
 \'et\'e déclaré dans la classe \classname{Vehicle}, et il est donc hérité dans les classes \classname{FlyingCar} et
 \classname{Car}. Supposons maintenant que nous ajoutions une m\'ethode \`a
-\classname{FlyingCar} qui fasse appel à ce champ :
+\classname{FlyingCar} qui fasse appel à ce champ :\\
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}
@@ -363,7 +363,7 @@ d\'efini dans les classes m\`eres est h\'erit\'e \emph{deux fois} (une par l'hér
 La technique consiste simplement \`a pr\'eciser au compilateur qu'il ne doit
 h\'eriter des champs et des méthodes de la classe \classname{Vehicle} qu'une seule fois,
 et non deux. Cela se fait au moyen du mot cl\'e \keyword{virtual} que l'on
-\'ecrira devant le nom de la classe dont on h\'erite :
+\'ecrira devant le nom de la classe dont on h\'erite :\\
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}
@@ -373,14 +373,18 @@ class child : public virtual Mother
 \end{lstlisting}
 \end{DDbox}
 
-Les headers de nos classes \classname{FlyingVehicle} et \classname{Car} deviendront donc:
+Les headers de nos classes \classname{FlyingVehicle} et \classname{Car} deviendront donc:\\
 
 \includecodecaption{avion4.h}{vehiculeVolant4.h}
-\includecode{voiture4.h}
-
-Nous pouvons noter la pr\'esence du mot cl\'e \keyword{virtual} devant \classname{Vehicle} dans la d\'eclaration d'h\'eritage.
+\includecode{voiture5.h}
 
 \section{Composition}
+
+Jusqu'à présent, toutes nos classes possédaient des champs publics ou privés de type primitif (comme des int, des double, des boolean). En règle générale, nous voulons avoir plus d'expressivité et pouvoir disposer de champs de tout type. Pour faciliter la construction de classes avancées à partir de classes plus élémentaires, le C++ permet donc de composer les objets, c'est-à-dire de fournir dans une classe des champs du type d'une autre classe.
+
+Si l'héritage exprime une relation de "Est un" entre la classe mère et la classe fille, la composition permet ainsi d'exprimer la relation "Possède un" entre deux classes.
+
+Il est important de noter que l'objet possédant "détient" les objets possédés : lorsque l'objet possédant est créé, les objets possédés sont construits, et lorsque l'objet possédant est détruit, les objets possédés sont détruits simultanément.
 
 dont déclaration forward.
 

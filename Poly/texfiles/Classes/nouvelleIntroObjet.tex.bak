@@ -1,20 +1,16 @@
-\chapter{Introduction \`a l'objet : les classes}
+\begin{savequote}[80mm]
+- - Ah, voilà enfin le roi de la classe ! L’homme trop bien sapé, Abitbol ! Alors comme ça tu as été élu l’homme le plus classe du monde ! Laisse-moi rire ! Style le grand playboy des fonds marins, [...]
 
-\begin{savequote}[130mm]
-Mais c’est pas ça qu’on appelle la classe. Je te dis ça en qualité d’homme le plus classe du monde.
-- Eh je t’arrête tout de suite. La classe, c’est d’être chic dans sa manière de s’habiller. Rien de tel que d’aller chez Azzedine Alaia même de s’acheter des sous-pulls chez Yohji Yamamoto !
-- Excuse-moi de te dire ça mon pauvre José, mais tu confonds un peu tout. Tu fais un amalgame entre la coquetterie et la classe. Tu es fou. Tu dépenses tout ton argent dans les habits et accessoires de mode mais tu es ridicule. Enfin si ça te plait… C’est toi qui les portes. Mais moi, si tu veux mon opinion, ça fait un peu… has been.
-- La vache ! Moi, j’ai l’air has been ? J’en ai pour plus d’une barre de fringues sur moi. Alors va te faire mettre !
-- Tu n’es vraiment pas très sympa. Mais le train de tes injures roule sur les rails de mon indifférence. Je préfère partir plutôt que d’entendre ça plutôt que d’être sourd.
-- Bien ! Considère qu’on n’est plus amis, Abitbol !
-La classe américaine, José et Georges Abitbol.
-8.7/10 8.71 (52 votes)
-Où j’ai connu Georges ? C
-J’aimerais bien que tu re
-Monde de merde.
-Je préfère partir plutôt
-Tiens regarde, les anglai
+- [...] Mais c'est pas ça qu'on appelle la classe. Je te dis ça en qualité d'homme le plus classe du monde.\\
+
+- Eh je t'arrête tout de suite. La classe, c’est d'être chic dans sa manière de s'habiller. Rien de tel que d'aller chez Azzedine Alaia même de s'acheter des sous-pulls chez Yohji Yamamoto !\\
+
+- Excuse-moi de te dire ça mon pauvre José, mais tu confonds un peu tout. Tu fais un amalgame entre la coquetterie et la classe. Tu es fou. Tu dépenses tout ton argent dans les habits et accessoires de mode mais tu es ridicule. Enfin si ça te plait... C'est toi qui les portes. Mais moi, si tu veux mon opinion, ça fait un peu... has been.\\
+
+\qauthor{La classe américaine, José et Georges Abitbol}
 \end{savequote}
+
+\chapter{Introduction \`a l'objet : les classes}
 
 La complexité d'un code n'est pas linéaire avec sa taille : plus un projet est volumineux, plus l'ajout marginal de code s'avère complexe. Il devient rapidement
 (au delà de quelques centaines de lignes de code) nécessaire d'architecturer le code pour en faciliter la lecture,

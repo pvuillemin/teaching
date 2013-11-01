@@ -234,7 +234,7 @@ d\'eclarer une classe d\'eriv\'ee au moyen de trois mots cl\'es diff\'erents :
 pr\'esent, nous n'avons employ\'e que le mot cl\'e \keyword{public}. Que
 signifie-t-il pr\'ecis\'ement?\\
 
-En réalité, chacun des mots clefs (public, private ou protected) agit comme une sorte de filtre sur la visibilit\'e des membres de la classe m\`ere. Pour ce point, la manière la plus claire de définir ces différents filtres est d'en donner un exemple :\\ 
+En réalité, chacun des mots clefs (public, private ou protected) agit comme une sorte de filtre sur la visibilit\'e des membres de la classe m\`ere. Pour ce point, la manière la plus claire de définir ces différents filtres est d'en donner un exemple :\\
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}
@@ -378,8 +378,195 @@ Les headers de nos classes \classname{FlyingVehicle} et \classname{Car} deviendr
 \includecodecaption{avion4.h}{vehiculeVolant4.h}
 \includecode{voiture5.h}
 
-\section{Composition}
+\section{Composition et Aggrégation}
 
-dont déclaration forward.
+\subsection{Composition}
 
-\section{Héritage vs Composition}
+Jusqu'à présent, toutes nos classes possédaient des champs publics ou privés de type primitif (comme des int, des double, des boolean). En règle générale, nous voulons avoir plus d'expressivité et pouvoir disposer de champs de tout type. Pour faciliter la construction de classes avancées à partir de classes plus élémentaires, le C++ permet justement de composer les objets, c'est-à-dire de fournir dans une classe des champs du type d'une autre classe. Ainsi, nous pourrons écrire :\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+class A 
+{
+    public:
+        A();
+        ~A();
+};
+
+class B
+{
+    public:
+        B(A a);
+        ~B();
+        
+    private:
+        A _a;        
+};
+
+B::B(A a)
+{
+    _a = a;
+}
+
+\end{lstlisting}
+\end{DDbox}
+
+Si l'héritage exprime une relation de "Est un" entre la classe mère et la classe fille, la composition permet ainsi d'exprimer la relation "Possède un" entre deux classes.\\
+
+Il est important de noter que l'objet possédant (\classname{B} dans notre exemple) "détient" les objets possédés. Lorsque l'objet possédant (souvent désigné sous le terme d'objet composite) est construit, le paramètre a est passé par valeur, le constructeur-copie est appelé, et \classname{B} détient alors une copie de \varname{a}, notée \varname{\_a}. De la même manière, lorsque l'objet possédant (\classname{B}) est détruit, les objets possédés (\varname{\_a}) sont détruits simultanément.
+
+\subsection{Aggrégation}
+
+Un cas un peu plus subtil apparaît quand nous ne voulons pas de la notion de possession décrite dans le cas de la composition. Nous pouvons alors dans notre classe \classname{B} posséder un pointeur sur \classname{A}, plutôt qu'une instance de la classe \classname{A}.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+class A
+{
+    public:
+        A();
+        ~A();
+};
+
+class B
+{
+    public:
+        B(A* pa);
+        ~B();
+
+    private:
+        A* _pa;
+};
+
+B::B(A* pa)
+{
+    _pa = pa;
+}
+
+\end{lstlisting}
+\end{DDbox}
+
+Dans ce cas, l'instance \varname{a} a une existence indépendamment de la construction, de l'existence, ou de la destruction des instances de classe \classname{B}.\\
+
+En règle générale, l'aggrégation est préférée à la composition pour éviter de copier des objets, ou lorsqu'il est manifeste que les deux types d'objets doivent avoir des existences qui ne sont pas subordonnées l'une à l'autre.\\
+
+Il existe un cas où l'aggrégation est indispensable, c'est lorsqu'une classe \classname{A} doit possèder des champs de type A. Dans ce contexte, une composition mènerait par récursion à une création infinie d'instances de type \classname{A} (en construisant la première instance, il faudrait construire la deuxième instance qui est le champ de la première, pour construire la deuxième instance il faudrait construire la troisième qui est le champ de la deuxième, etc.). Nous obtenons alors le code suivant :\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+class A
+{
+    public:
+        A(A* pa);
+        ~A();
+        
+    private:
+        A* _inner;
+};
+
+A::A(A* pa)
+{
+    _inner = pa;
+}
+
+\end{lstlisting}
+\end{DDbox}
+
+Donnons deux exemples plus concrets de cas d'utilisation.\\ 
+
+Le premier exemple est une classe \classname{User} correspondant aux informations stockées par utilisateur dans un réseau social. Une des raisons principales des réseaux sociaux étant de pouvoir déclarer au monde que nous sommes passés d'un statut de "single" à "it's complicated with \varname{Trucmuche}", nous voulons pouvoir stocker dans chaque instance un pointeur vers \varname{Trucmuche}. Le code \ref{} en donne un aperçu.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+class FbUser
+{
+    public:
+        FbUser(string name, int id, string status, FbUser* pa);
+        ~FbUser();
+
+    private:
+        FbUser* _mate;
+        string _name;
+        string _status;
+        int _id;
+};
+
+\end{lstlisting}
+\end{DDbox}
+
+Le second exemple est la construction récursive d'un arbre binaire (schématisé dans le graphique \ref{fig:BinaryTree}). Dans ce premier exemple, chaque noeud de type \classname{Node} détient deux pointeurs vers ses deux noeuds fils (\varname{\_left} et \varname{\_right}). Dans le cas d'un noeud sans fils (i.e. une feuille), les pointeurs valent \varname{NULL}. Dans cet architecture, un arbre est donc une structure possédant un pointeur sur le premier noeud (la racine).\\
+
+\begin{figure}[]
+	\begin{center}
+		\includegraphics[scale=0.8]{../../Pictures/BinaryTree}
+	\end{center}
+	\caption{Exemple d'arbre binaire}
+	\label{fig:BinaryTree}
+\end{figure}
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+class Node
+{
+    public:
+        Node(Node* left, Node* right);
+        ~Node();
+
+    private:
+        Node* _left;
+        Node* _right;
+};
+
+\end{lstlisting}
+\end{DDbox}
+
+Par abus de langage, les concepts de Composition et d'Aggrégation sont souvent confondus sous le terme Composition.\\
+
+\subsection{Dépendances cycliques et Déclarations Forward}
+
+Il peut arriver qu'une classe \classname{A} contienne un champ (ou un argument d'une méthode) de type classe \classname{B} et que la classe \classname{B} contienne elle aussi un champ (ou un argument d'une méthode) de type classe \classname{A}\footnote{Nous pouvons complexifier à volonté ce design, par exemple avec \classname{A} qui dépend de \classname{B}, \classname{B} qui dépend de \classname{C} et \classname{C} qui dépend de \classname{A}}. Nous avons alors une dépendance cyclique. Si nous incluons A.h dans B.h et B.h dans A.h, nous avons un problème d'inclusion cyclique et la compilation échouera.\\
+
+La solution à ce problème est d'utiliser des déclarations forward. Au lieu d'inclure le header déclarant \classname{A} dans B.h ou dans B.cpp, nous  déclarons seulement le type \classname{A} pour indiquer au compilateur que ce type existe. Cette technique fonctionne en raison de la manière dont travaille le compilateur, mais c'est un "workaround" qui n'est plus nécessaire dans les nouveaux langages comme le Java ou le C\#.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = A.h]
+class B;
+
+class A
+{
+    B* PtrB;
+};
+\end{lstlisting}
+\end{DDbox}
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = A.cpp]
+#include "A.h"
+#include "B.h"
+
+// ...
+\end{lstlisting}
+\end{DDbox}
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = B.h]
+#include "A.h"
+
+class B
+{
+    A a;
+};
+
+\end{lstlisting}
+\end{DDbox}
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = B.cpp]
+#include "B.h"
+
+// ...
+
+\end{lstlisting}
+\end{DDbox}
+
+
