@@ -1,64 +1,20 @@
 \chapter{Allocation dynamique }
 
-Ce chapitre sera un peu plus th\'eorique que les autres, mais il expose des
-notions indispensables \`a la bonne compr\'ehension du C++. Il est donc
-\emph{important}\footnote{Il faut également le relire jusqu'\`a ce qu'il soit compris.}
-et sera consacr\'e aux tableaux, \`a l'allocation dynamique de m\'emoire et aux
-pointeurs.
+Dans ce chapitre, nous raffinons le modèle mémoire déjà ébauché en section \ref{sec:stack} en introduisant une nouvelle forme de mémoire, la \textit{Heap}, à la fois plus souple et plus complexe.
 
 \section{Tableaux}
 
-Il est possible en C++ de d\'eclarer un \index{tableau}tableau de variables. Cela se fait de
-la mani\`ere suivante :
+Comme nous l'avons vu dans la section \ref{sec:stack}, la zone mémoire dédiée à chaque fonction, la "\textit{Stack Frame}", est ajoutée à la \textit{Stack} lorsque nous entrons dans la fonction. De même, cette zone mémoire est automatiquement détruite lorsque nous terminons la fonction.\\
 
-\begin{lstlisting}[caption=D\'eclaration d'un tableau]
-Type arrayName[size];
-\end{lstlisting}
+Nous donnons tout d'abord deux cas dans lesquels nous ne pouvons/souhaitons pas recourir à cette forme de mémoire.\\
 
-Par exemple,
+\begin{enumerate}
+\item Lorsque nous souhaitons créer un tableau dont la taille n'est pas connue à la compilation, voir même n'est pas connue à l'entrée de la fonction. Ce tableau ne peut donc être contenu dans une Stack Frame, puisqu'à la construction de cette Stack Frame, sa taille est encore inconnue. 
+\item Lorsque nous souhaitons créer un objet dont le scope excède celui de la fonction dans laquelle il est créé. Si l'objet est stocké dans une Stack Frame, il sera détruit en même temps que celle-ci, il va donc falloir le stocker dans un autre espace.\\
+\end{enumerate}
 
-\begin{lstlisting}
-double someArray[ 50 ];
-\end{lstlisting}
-permet de d\'eclarer un tableau de 50 nombres d\'ecimaux en double pr\'ecision.\\
+Ces deux exemples sont fondamentaux, et ils font l'objet de ce chapitre. Pour traiter le premier exemple
 
-On acc\`ede alors aux \'el\'ements du tableau \`a l'aide de l'op\'erateur \texttt{[ ]}. Pour cr\'eer un tableau
-de 10 \'el\'ements et y ranger les carr\'es des entiers de 1 \`a 10, on \'ecrirait:
-\begin{lstlisting}[caption=Utilisation d'un tableau]
-double someArray[ 10 ];
-
-for( int i = 0 ; i < 10 ; i++)
-{
-    tableau[i]=(i+1)*(i+1); //Le tableau commence a l'indice 0
-}
-\end{lstlisting}
-
-La syntaxe \'equivalente en Python ou en VBA serait :
-\begin{center}%
-    \begin{minipage}{0.45\linewidth}
-       \begin{center}\emph{Python}\end{center}
-\begin{lstlisting}[language=python]
-#c'est une liste et
-#non un tableau
-tableau = []
-
-for i in range(1, 11):
-	tableau.append(i * i)
-\end{lstlisting}
-    \end{minipage}
-    \qquad
-    \begin{minipage}{0.45\linewidth}%
-    \begin{center}\emph{VBA}\end{center}
-\begin{lstlisting}[language=VBScript]
-dim i as Integer
-dim tableau(10) as Integer
-
-for i=1 to 10
-    tableau(i)=i*i
-next i
-\end{lstlisting}
-    \end{minipage}
-\end{center}
 
 \section{Allocation dynamique }
 Supposons \`a pr\'esent que nous souhaitions \'ecrire un programme qui demande \`a l'utilisateur de rentrer un nombre $n$.

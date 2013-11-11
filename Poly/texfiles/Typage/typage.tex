@@ -270,6 +270,72 @@ L'emploi d'une \'enum\'eration a donc r\'esolu nos probl\`emes :
 		
 \end{itemize}
 
+\section{Tableaux statiques}
+
+Il est possible en C++ de d\'eclarer un \index{tableau}tableau de variables. Cela se fait de
+la mani\`ere suivante :\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption=D\'eclaration d'un tableau]
+Type arrayName[size];
+\end{lstlisting}
+\end{DDbox}
+
+Par exemple,\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+double someArray[ 50 ];
+\end{lstlisting}
+\end{DDbox}
+
+permet de d\'eclarer un tableau de 50 nombres d\'ecimaux en double pr\'ecision.\\
+
+Nous acc\`edons alors aux \'el\'ements du tableau \`a l'aide de l'op\'erateur \texttt{[ ]}. Pour cr\'eer un tableau
+de 10 \'el\'ements et y ranger les carr\'es des entiers de 1 \`a 10, nous \'ecririons:\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption=Utilisation d'un tableau]
+double someArray[ 10 ];
+
+for( int i = 0 ; i < 10 ; i++)
+{
+    someArray[i]=(i+1)*(i+1); //All arrays start at index 0
+}
+\end{lstlisting}
+\end{DDbox}
+
+La syntaxe \'equivalente en Python ou en VBA serait :
+\begin{center}%
+    \begin{minipage}{0.45\linewidth}
+       \begin{center}\emph{Python}\end{center}
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[language=python]
+#c'est une liste et
+#non un tableau
+tableau = []
+
+for i in range(1, 11):
+	tableau.append(i * i)
+\end{lstlisting}
+\end{DDbox}
+    \end{minipage}
+    \qquad
+    \begin{minipage}{0.45\linewidth}%
+    \begin{center}\emph{VBA}\end{center}
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[language=VBScript]
+dim i as Integer
+dim tableau(10) as Integer
+
+for i=1 to 10
+    tableau(i)=i*i
+next i
+\end{lstlisting}
+\end{DDbox}
+    \end{minipage}
+\end{center}
+
 \section{Le typage du C++}
 
 Le C++ est un langage typ\'e de mani\`ere statique. Cela signifie que les variables doivent \^etre d\'eclar\'ees et leur types explicit\'es, à la différence par exemple du python où une variable peut contenir successivement un entier puis une chaîne de caractère ou un double. Le compromis qui se cache derrière ce choix est un compromis souplesse / performance. Devoir déterminer à l'exécution le type d'une variable plutôt que de l'avoir déterminé statiquement a un certain coût. Les types n'existent en C++ qu'à la compilation, c'est à dire qu'à l'execution il n'est plus possible de récupérer le type d'un objet; cette limitation ne se retrouve pas dans des langages plus récents comme le C\#.\footnote{En C\#, on peut par exemple récupérer le type d'un objet à l'exécution, parcourir l'ensemble des types chargés en mémoire, sélectionner les types qui héritent de telle classe et qui possèdent un constructeur vide, les instancier, etc.}.

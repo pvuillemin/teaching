@@ -170,12 +170,14 @@ int Square(int x) //definition de Square
 
 Pour ne pas nuire à la lisibilité du code, nous allons isoler la déclaration de la fonction Square dans un fichier header (.h), que nous ajoutons à notre projet. Nous obtenons donc dans main.h :\\
 
-\begin{DDbox}{\linewidth}\begin{lstlisting}
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
 
 //Main.h
 
 int Square(int);
-\end{lstlisting}\end{DDbox}
+\end{lstlisting}
+\end{DDbox}
 
 et dans main.cpp :\\
 
@@ -195,13 +197,25 @@ int Square(int x)
 	return x*x;
 }
 
-\end{lstlisting}\end{DDbox}
+\end{lstlisting}
+\end{DDbox}
 
 Nous retrouvons alors la séparation déclarations dans les fichiers headers et définitions dans les fichiers .cpp comme annoncée dans le chapitre interpréteur/compilateur.\\
 
 Le lecteur déjà initié au C\# ou au Java se demandera naturellement pourquoi il est nécessaire de déclarer les méthodes avant de les définir. C'est principalement pour des raisons historiques; c'est la façon dont on codait en C, et par souci de compatibilité, c'est la manière de faire pour le C++. Il y a d'autres raisons qui peuvent être avancées, notamment l'accélération des temps de compilation, le fait de pouvoir faire référence à du code dont vous n'avez que la déclaration et pas la définition, ... La vraie raison est qu'à l'époque du C, on ne savait pas encore faire autrement, et les techniques de compilation se sont infiniment améliorées depuis cette époque.
 
-\section{Scopes des variables}
+\section{Premier modèle mémoire, Stack et Scope des variables}
+\label{sec:stack}
+
+Nous donnons à présent une première modélisation naïve de la mémoire. Puisque l'exécution d'un programme se décompose en l'exécution de multiples fonctions, l'environnement doit garder trace de l'enchaînement actuel des fonctions, ainsi que de l'état des données relatives à chacune de ces fonctions.\\
+
+Lorsqu'une fonction est appelée, l'environnement lui construit un espace mémoire dédié, appelé \textit{"Stack Frame"}, dans lequel sont stockés : les arguments de la fonction, les variables locales de la fonction, l'adresse de la ligne de code à exécuter lorsque l'appel à cette fonction sera terminé. Toutes ces données n'existent que pendant le temps d'exécution de la fonction : nous disons que la durée de vie (ou le \textit{"Scope"}) de ces données sont les mêmes que ceux de la fonction.\\
+
+Lorsqu'une fonction g appelée par une fonction f est terminée, l'environnement revient à la fonction f et restaure son état de telle sorte que les instructions de f qui faisaient suite à l'appel de g peuvent être exécutées.\\
+
+Pour stocker toutes les données nécessaires à la bonne exécution d'une application, l'environnement fait donc appel à une structure de données spécialisée appelée : la \textit{Stack}. Cette structure s'organise comme une pile d'assiettes sur laquelle les assiettes peuvent être empilées et dépilées selon l'ordre : la dernière arrivée est la première sortie (\textit{"Last In First Out, ou LIFO"}).\\ 
+
+A chaque fois qu'une fonction est appelée, une assiette (Stack Frame) est ajoutée sur la stack, contenant toutes les informations et la mémoire nécessaire à la bonne exécution de la fonction. Dès que cette fonction est terminée, toutes ses variables deviennent inutiles, sa Stack Frame est alors ôtée du haut de la stack, et l'exécution revient à la ligne de code suivante de la fonction appelante. La Stack Frame tout en haut de la stack est donc celle correspondant à la fonction actuellement exécutée.\\
 
 Considérons l'exemple suivant :\\
 
@@ -209,13 +223,61 @@ Considérons l'exemple suivant :\\
 double SquareError(double x, double y)
 {
     double s = x-y;
-    return s*s;
+    double result = s*s;
+    return result;
+    
+}
+
+void main()
+{
+    double x1 = 2.3;
+    double y1 = 3.2;
+    double z = SquareError(x1, y1);
 }
 \end{lstlisting}\end{DDbox}
 
-Dans cet exemple, la variable s est déclarée dans la fonction SquareError et sert de résultat intermédiaire. Lorsque nous commençons à exécuter cette fonction, la variable s est créée, puis elle stocke le résultat de x-y. Cette variable s est une variable muette, c'est à dire qu'elle sert à définir le sens de la fonction SquareError, mais qu'elle ne possède pas de sens en dehors, tout comme la variable k sert à définir la valeur de la fonction f dans $f(n) = \sum_{k=1}^{n}\frac{1}{k^2}$. Pour des raisons d'espace et de performance, les variables qui ne sont plus utilisées sont détruites, et l'emplacement mémoire qu'elles utilisaient est réalloué dès que nécessaire. On peut donc dire que la durée de vie (scope) d'une variable déclarée dans une fonction s'étend de la ligne où elle est déclarée jusqu'à la fin de la fonction. En dehors de cette fonction, l'identifiant s n'est pas associé à une variable, et nous pouvons réutiliser cet identifiant pour lui donner un autre sens.\\
+Lorsque la fonction \functionname{main} est appelée, une première Stack Frame est ajoutée à la Stack, qui était vide. Nous nous retrouvons alors avec une mémoire dans l'état décrit par le graphique \ref{fig:stack1}.\\
 
-Considérons l'exemple suivant :\\
+Lorsque la fonction \functionname{SquareError} est appelée, une Stack Frame est ajoutée en haut de la Stack, Frame contenant les variables locales \varname{s} et \varname{result}, les arguments \varname{x} et \varname{y}, ainsi que la ligne de code dans la fonction appelante (\functionname{main}) à exécuter lorsque SquareError sera terminée. Les deux Stack Frames sont schématisées sur le graphe \ref{fig:stack3}.\\
+
+Enfin, après l'exécution de la fonction \functionname{SquareError}, tout le contexte de la fonction devient caduque, et la Stack Frame correspondante est dépilée. En revenant dans la fonction \functionname{main}, nous nous retrouvons à nouveau dans l'état décrit par le graphe \ref{fig:stack1}.\\
+
+\begin{figure}[]
+	\begin{center}
+		\includegraphics[scale=0.5]{../../Pictures/stack1}
+	\end{center}
+	\caption{Etat de la stack à l'entrée du main}
+	\label{fig:stack1}
+\end{figure}
+
+\begin{figure}[]
+	\begin{center}
+		\includegraphics[scale=0.5]{../../Pictures/stack3}
+	\end{center}
+	\caption{Etat de la stack à l'entrée dans SquareError}
+	\label{fig:stack3}
+\end{figure}
+
+Dans cet exemple, les variables \varname{x1} et \varname{y1} sont des variables locales de la fonction \functionname{main}, tout comme les variables \varname{x} et \varname{y} sont des arguments de la fonction \functionname{SquareError}. Dans les deux cas, ces variables sont des variables muettes,  c'est à dire qu'elles servent à définir le sens des fonctions \functionname{SquareError} et \functionname{main}, mais qu'elles ne possèdent pas de sens en dehors, tout comme la variable k sert à définir la valeur de la fonction f dans $f(n) = \sum_{k=1}^{n}\frac{1}{k^2}$. Leur scope ne se rencontrant pas, il est donc possible d'utiliser les mêmes noms de variables dans chacune des fonctions sans que celà n'interfère avec le sens du code. Ainsi, le code suivant donne exactement les mêmes résultats : \\
+
+\begin{DDbox}{\linewidth}\begin{lstlisting}
+double SquareError(double x, double y)
+{
+    double s = x-y;
+    double result = s*s;
+    return result;
+
+}
+
+void main()
+{
+    double x = 2.3;
+    double y = 3.2;
+    double z = SquareError(x, y);
+}
+\end{lstlisting}\end{DDbox}
+
+Considérons un autre exemple :\\
 
 \begin{DDbox}{\linewidth}\begin{lstlisting}
 
@@ -230,7 +292,8 @@ double SquareError(double x, double y)
 double ManhattanError(double x, double y)
 {
 	double s = x-y;
-	return abs(s);
+    double result = abs(s);
+	return result;
 }
 
 void main()
@@ -244,9 +307,43 @@ void main()
 
 \end{lstlisting}\end{DDbox}
 
-Dans cet exemple, les valeurs a,b,c,d,e ont pour scope la fonction main. Une variable s est déclarée dans SquareError, et elle est détruite à la fin de la fonction. L'identifiant s est "recyclé" dans la fonction ManhattanError, et la variable s est également détruite à la fin de cette fonction. Le double usage de l'identifiant s ne pose pas de problème au compilateur, qui comprend que la variable est "muette" dans les deux cas.\\
+Dans cet exemple, les valeurs \varname{a,b,c,d,e} ont pour scope la fonction main. Une variable \varname{s} est déclarée dans \functionname{SquareError}, et elle est détruite à la fin de la fonction. L'identifiant \varname{s} est "recyclé" dans la fonction ManhattanError, et la variable \varname{s} est également détruite à la fin de cette fonction. Le double usage de l'identifiant \varname{s} ne pose pas de problème au compilateur, qui comprend que la variable est "muette" dans les deux cas.\\
 
-Notez que pour utiliser la fonction valeur absolue, fonction standard du langage, nous devons utiliser la librairie "math", dont les méthodes sont déclarées dans le fichier header math.h qui est stocké dans le répertoire de Visual Studio. Pour utiliser cette librairie, nous utilisons donc un include, mais substituons les symboles < et > en lieu et place des guillemets "" pour spécifier au compilateur que ce fichier math.h appartient à la bibliothèque standard et n'est pas un fichier de votre propre cru.\\
+A l'entrée de la fonction main, l'état de la Stack est représenté dans le graphique \ref{fig:stack4}. Lorsque la fonction \functionname{SquareError} est appelée, la Stack se trouve dans l'état représenté par le graphique \ref{fig:stack5}. Lorsque la fonction \functionname{SquareError} est achevée, l'état de la Stack revient à celui du graphique \ref{fig:stack4}. Ensuite, la fonction \functionname{ManhattanError} est appelée, et la Stack passe alors dans l'état représenté dans le graphique \ref{fig:stack6}. Enfin, juste avant la fin de la fonction \functionname{ManhattanError}, et avant de retourner dans le mail, il est fait appel à la fonction \functionname{abs} qui vient ajouter alors une Stack Frame dans la Stack\footnote{Pour être tout à fait exact, le compilateur est capable, dans de nombreux cas comme celui-ci, de déterminer qu'il n'est pas nécessaire de garder trace de la Stack Frame de \functionname{ManhattanError} lorsque nous sommes dans la fonction \functionname{abs}, et qu'il peut optimiser les appels pour ne garder que les Stacks Frames de \functionname{abs} et \functionname{main} : c'est le principe du "Tail Call Optimization".}, comme il est présenté dans le graphe \ref{fig:stack7}.\\
+
+Notez que pour utiliser la fonction valeur absolue, fonction standard du langage, nous devons utiliser la librairie "math", dont les méthodes sont déclarées dans le fichier header \varname{math.h} qui est stocké dans le répertoire de Visual Studio. Pour utiliser cette librairie, nous utilisons donc un include, mais substituons les symboles < et > en lieu et place des guillemets "" pour spécifier au compilateur que ce fichier \varname{math.h} appartient à la bibliothèque standard et n'est pas un fichier de votre propre cru.\\
+
+\begin{figure}[]
+	\begin{center}
+		\includegraphics[scale=0.5]{../../Pictures/stack4}
+	\end{center}
+	\caption{Etat de la stack à l'entrée du main}
+	\label{fig:stack4}
+\end{figure}
+
+\begin{figure}[]
+	\begin{center}
+		\includegraphics[scale=0.5]{../../Pictures/stack5}
+	\end{center}
+	\caption{Etat de la stack à l'entrée dans SquareError}
+	\label{fig:stack5}
+\end{figure}
+
+\begin{figure}[]
+	\begin{center}
+		\includegraphics[scale=0.5]{../../Pictures/stack6}
+	\end{center}
+	\caption{Etat de la stack à l'entrée dans ManhattanError}
+	\label{fig:stack6}
+\end{figure}
+
+\begin{figure}[]
+	\begin{center}
+		\includegraphics[scale=0.5]{../../Pictures/stack7}
+	\end{center}
+	\caption{Etat de la stack à l'entrée dans abs}
+	\label{fig:stack7}
+\end{figure}
 
 \section{Passage d'arguments}
 
