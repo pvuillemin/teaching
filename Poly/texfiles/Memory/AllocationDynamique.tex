@@ -83,7 +83,8 @@ Des exemples non triviaux de cas où l'allocation dynamique est nécessaire sont d
 
 \section{Les 3 problèmes de l'allocation dynamique de mémoire}
 
-\subsection{Nettoyage de la m\'emoire}
+\subsection{Memory Leaks}
+\label{sec:memoryLeak}
 
 Nous savons \`a pr\'esent allouer de la m\'emoire selon nos besoins, en cours
 d'ex\'ecution du programme. Qu'advient-il de cette m\'emoire allou\'ee  lorsque notre
@@ -229,6 +230,7 @@ void main()
 Lorsque la fonction \functionname{f} s'achève, sa Stack Frame est détruite, le destructeur de \varname{copy} est appelé automatiquement, celui-ci déréférence le pointeur \varname{\_pa} de \varname{copy} et désalloue l'instance pointée, c'est à dire l'instance de type \classname{A} présente sur la Heap. Lorsque la fonction \functionname{main} s'achève à son tour, l'instance \varname{b} est à son tour détruite automatiquement, son destructeur est appelé, et celui-ci tente d'appeler \functionname{delete} sur \varname{b.\_pa}, alors que l'instance de type \classname{A} a déjà été détruite, produisant ainsi une Segmentation Fault.\\
 
 \subsection{Dangling Pointers}
+\label{sec:dangling}
 
 Enfin, le troisième risque que comporte la gestion dynamique de mémoire consiste à tenter de déréférencer un pointeur pointant vers une instance déjà détruite. Par exemple, le code du listing \ref{DanglingPointers} mène à un comportement indéfini à l'exécution.\\ 
 
@@ -247,11 +249,189 @@ void f()
 
 \section{Smart Pointers}
 
-Nous voudrions donc nous doter d'un pointeur "intelligent", appelé Smart Pointer dans ce qui suit, pour lequel nous avons le comportement d'un pointeur classique (possibilité de déréférencer le Smart Pointer via l'opérateur \texttt{*}, possibilité d'accéder aux champs et méthodes de l'instance pointée directement par l'opérateur \texttt{->}), mais pour lequel nous n'avons pas à gérer l'appel au \functionname{delete}, c'est à dire qu'il gère lui-même l'allocation et la désallocation dynamique de mémoire, sans créer de Memory Leaks ou de SegFault.\\ 
+Nous voudrions donc nous doter d'un pointeur "intelligent", appelé Smart Pointer dans ce qui suit, pour lequel nous avons le comportement d'un pointeur classique (possibilité de déréférencer le Smart Pointer via l'opérateur \texttt{*}, possibilité d'accéder aux champs et méthodes de l'instance pointée directement par l'opérateur \texttt{->}), mais pour lequel nous n'avons pas à gérer l'appel au \functionname{delete}, c'est à dire que ce Smart Pointer gère lui-même l'allocation et la désallocation dynamique de mémoire, sans créer de Memory Leaks ou de SegFault.\\ 
 
-Nous commençons par écrire 
+Nous commençons par écrire par écrire la partie "Wrapper" du Smart Pointer, c'est à dire les opérateurs \texttt{*} et \texttt{->}, comme dans le listing \ref{SmartPointer1} :\\
 
-Dans cet exemple, supposons maintenant que 
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption=Première implémentation d'un SmartPointer, label=SmartPointer1]
+template < typename T > class SmartPointer
+{
+    public:
+        SmartPointer(T* pValue)
+        {
+            _pInner = pValue;
+        }
+        
+        ~SmartPointer(){}
+
+        T& operator* ()
+        {
+            return *_pInner;
+        }
+
+        T* operator-> ()
+        {
+            return _pInner;
+        }
+
+    private:
+        T*    _pInner; // Generic pointer to be stored
+};
+\end{lstlisting}
+\end{DDbox}
+
+Dans cet exemple, nous retrouvons les problèmes de Memory Leaks détaillés dans la section \ref{sec:memoryLeak}. Nous pouvons donc ajouter un appel à l'opérateur \functionname{delete} dans le destructeur de notre Smart Pointer, comme il a été fait dans la section \ref{fig:segFault}, transformant ainsi notre code en celui du listing \ref{SmartPointer2}.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption=Seconde implémentation d'un SmartPointer, label=SmartPointer2]
+template < typename T > class SmartPointer
+{
+    public:
+        SmartPointer(T* pValue)
+        {
+            _pInner = pValue;
+        }
+
+        ~SmartPointer()
+        {
+            delete _pInner;
+        }
+
+        T& operator* ()
+        {
+            return *_pInner;
+        }
+
+        T* operator-> ()
+        {
+            return _pInner;
+        }
+
+    private:
+        T*    _pInner; // Generic pointer to be stored
+};
+\end{lstlisting}
+\end{DDbox}
+
+Cependant, nous nous retrouvons avec les risques de Segmentation Fault expliqués dans la même section \ref{sec:segFault}. Pour régler cette difficulté, il nous faut remarquer que le problème de Segmentation Fault rencontré ici provient du fait que plusieurs Smart Pointers possèdent un pointeur vers le même objet dans la Heap, et que l'un de ces Smart Pointer supprime l'objet de la Heap alors que d'autres vont essayer de le faire plus tard. Il conviendrait donc de construire un mécanisme dans lequel c'est le dernier Smart Pointer qui pointe sur un objet et lui seul, qui va se charger de la désallocation. Pour réaliser ce mécanisme, nous allons donc construire un comptage du nombre de Smart Pointers "pointant" vers un objet de la Heap donné.\\ 
+
+Dans les listings \ref{SmartPointer3} et \ref{SmartPointer4}, nous construisons une classe \classname{Count} qui va recenser le nombre de Smart Pointers pointant sur une instance donnée. A la construction, la construction-copie ou l'affectation via l'opérateur =, ce compte est incrémenté. A la destruction d'un Smart Pointer, ce compte est décrémenté. Lorsque le compte atteint 0 après une décrémentation dans le destructeur, plus aucun Smart Pointer ne pointe sur l'instance de la Heap, et nous pouvons alors nettoyer sans danger cette instance. Cette technique prend le nom de \textit{Reference Counting}.\\
+
+Le Reference Counting s'inscrit dans un cadre plus large de gestion des ressources, et peut se résumer par un principe empirique de la "Rule of Three" : \textbf{si vous êtes amenés à expliciter pour une classe le code du destructeur, du constructeur-copie ou de la surcharge de l'opérateur =, alors probablement vous devriez expliciter le code pour chacune de ces 3 methodes.}.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption=Implémentation d'un SmartPointer avec un Reference Counting (Partie1), label=SmartPointer3]
+
+template <typename T> class Counter
+{
+    public :
+        
+        void Decrement()
+        {
+            _count--;
+        }
+        
+        void Increment()
+        {
+            _count++;
+        }
+        
+        int GetValue()
+        {
+            return _count;
+        }
+        
+        Counter()
+        {
+            _count = 1;
+        }
+        
+    private :
+        int _count;
+}
+
+\end{lstlisting}
+\end{DDbox}
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption=Implémentation d'un SmartPointer avec un Reference Counting (Partie2), label=SmartPointer4]
+
+template <typename T> class SmartPointer
+{
+    public:
+        SmartPointer(T* pValue)
+        {
+            _pInner = pValue;
+            _pCount = new Count();
+        }
+
+        ~SmartPointer()
+        {
+            _pCount->Decrement();
+            if ( 0 == _pCount->GetValue())
+            {
+                delete _pInner;
+                delete _pCount;
+            }
+        }
+        
+        SmartPointer(const SmartPointer<T>& spSource)
+        {
+            _pInner = spSource._pInner;
+            _pCount = spSource._pCount;
+            _pCount->Increment();
+        }
+        
+        SmartPointer<T>& operator = (const SmartPointer<T>& spSource)
+        {
+            // Avoid self assignment
+            if (this != &spSource) 
+            {
+                // Decrement the old reference count and remove old data if necessary
+                _pCount->Decrement();
+                if( 0 == _Count->GetValue())
+                {
+                    delete _pInner;
+                    delete _pCount;
+                }
+
+                // Copy the data and counter then increment counter
+                _pInner = spSource._pInner;
+                _pCount = spSource._pCount;
+                _pCount->Increment();
+            }
+            return *this;
+        }
+        
+        T& operator* ()
+        {
+            return *_pInner;
+        }
+
+        T* operator-> ()
+        {
+            return _pInner;
+        }
+
+    private:
+        T* _pInner;
+        Count* _pCount;
+};
+\end{lstlisting}
+\end{DDbox}
+
+La différence entre le constructeur-copie et la surchage de l'opérateur = tient dans la possibilité d'écrire par erreur des choses semblables à celles du listing \ref{AequalsA}. Nous n'entrons pas plus dans le détail ici.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[label=AequalsA]
+a=a;
+\end{lstlisting}
+\end{DDbox}
+
+Les propos développés dans cette section nous amènent à comprendre pourquoi la gestion de mémoire est difficile. Dans la vie réelle, la classe SmartPointer est déjà définie et disponible, il s'agit de la classe "\classname{shared\_ptr}" de la librairie standard, disponible via l'inclusion du header "<memory>". Nous invitons bien évidemment le lecteur à utiliser cette classe plutôt qu'à réimplémenter lui-même cette classe.\\
+
+Il est important de noter que les algorithmes de Smart Pointers présentés dans cette section ne permettent pas de nettoyer parfaitement la mémoire. En effet, dans le cas de dépendances cycliques entre objets, ceux-ci ne pourront jamais être libérés via un mécanisme de Reference Counting.\\  
 
 \section{Allocation dynamique : le cas des tableaux }
 Supposons \`a pr\'esent que nous souhaitions \'ecrire un programme qui demande \`a l'utilisateur de rentrer un nombre $n$.
@@ -265,7 +445,7 @@ Spontan\'ement, nous voudrions cr\'eer un tableau de taille $n$ au moyen du code
 
 Malheureusement, ce code est erronn\'e. En effet, comme nous l'avons vu
 pr\'ec\'edemment, chaque fois que nous d\'eclarons une variable (ou un tableau),
-le compilateur C++ r\'eserve des cases m\'emoires. Mais pour les r\'eserver
+l'environnement C++ r\'eserve des cases m\'emoires dans la Stack Frame correspondante. Mais pour les r\'eserver
 correctement, il faut qu'il sache \emph{\`a la compilation}  combien de case il
 doit r\'eserver, \emph{ce qui n'est pas le cas ici}. Il nous faut donc trouver une
 autre solution.\\
@@ -273,25 +453,15 @@ autre solution.\\
 Le probl\`eme se pose en ces termes : comment dire au compilateur " Je veux
 r\'eserver n cases m\'emoires, \emph{pendant l'ex\'ecution et non pas à la compilation} du programme " ?\\ 
 
-Il existe une fonctionalité\footnote{Pour \^etre plus pr\'ecis, il s'agit en fait d'un op\'erateur d'un genre un peu particulier.} en C++ appel\'ee \texttt{new}, qui effectue pr\'ecis\'ement
-cette op\'eration, et renvoie l'adresse (donc \emph{un pointeur}) du d\'ebut de
-la zone m\'emoire ainsi r\'eserv\'ee. La syntaxe (dans notre cas) est la
-suivante :
+De la même manière que nous avons utilisé le mot clef \textbf{new} pour allouer dynamiquement une instance sur la Heap, nous pouvons utiliser ce même mot clef suivi d'un nombre entre crochets pour allouer dynamiquement un tableau d'un type donné à l'exécution. Dans le cas de la déclaration dynamique d'un tableau, l'instruction \textbf{new} renvoie un pointeur vers le début du tableau, c'est à dire vers son premier élement. La syntaxe (dans notre cas) est la suivante :\\
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}[caption=Exemple d' appel  \`a \texttt{new}]
-/*The following line allocates 10 integers into memory*/
+/*The following line allocates 10 integers onto the Heap*/
 int* someArray = NULL;
 someArray = new int [10];
 \end{lstlisting}
 \end{DDbox}
-
-Si nous \'etudions cette ligne, nous pouvons faire deux remarques :
-
-\begin{enumerate}
-\item \texttt{new} renvoie un pointeur du type demand\'e.
-\item \texttt{new} prend en param\`etre la taille du bloc \`a demander.
-\end{enumerate}
 
 \subsection{Arithm\'etique des pointeurs}
 
@@ -419,18 +589,20 @@ lorsque l'on manipule des pointeurs, le compilateur C++ ajoute automatiquement l
 \texttt{sizeof} n\'ecessaire. Cette arithm\'etique un peu particuli\`ere -on
 ajoute 2 \emph{en apparence} - porte le nom d'arithm\'etique des pointeurs.
 
+\section{Gestion de la mémoire pour les tableaux}
 
+La création dynamique de tableaux souffre des mêmes difficultés que l'allocation dynamique de variable, difficultés recensées en sections \ref{sec:memoryLeak}, \ref{sec:segFault} et \ref{sec:dangling}. Afin de supprimer la mémoire, il faut recourir à l'opérateur \functionname{delete[]} qui permet de supprimer un tableau dynamique. Tout comme en section \ref{sec:memoryLeak}, ne pas appeler l'opérateur \functionname{delete[]}, c'est créer des Memory Leaks, et l'appeler deux fois c'est faire une Segmentation Fault.\\
+
+Nous appuyant sur les considérations précédentes de ce chapitre et la Rule of Three, nous pouvons donc à présent construire une classe Vector, dont le constructeur prend en argument un entier n, construit un tableau dynamique de taille n, se comporte comme un tableau (i.e. possède un opérateur []), et évite à la fois les Memory Leaks et les SegFaults. Le code de cette classe Vector est présenté dans le chapitre suivant.\\
 
 \section{Quelques pr\'ecautions}
 
-Ce chapitre est sans doute le plus difficile \`a comprendre mais le plus
-important de ce cours : une fois compris, l'ensemble des notions abord\'ees par
-la suite para\^itront simple. Le langage C++ est un langage qui peut-\^etre consid\'er\'e comme de \emph{bas-niveau}
--par opposition \`a des langages comme Java, Python, Pascal, VBA, etc., qui
+Le langage C++ est un langage qui peut-\^etre consid\'er\'e comme de \emph{bas-niveau}
+-par opposition \`a des langages comme Java, Python, Pascal, etc., qui
 sont dits de haut niveau- dans la mesure o\`u il ne dissimule pas au
 programmeur ce qui se passe dans l'ordinateur. Cela a des avantages (contr\^ole
 tr\`es fin sur le d\'eroulement du programme, optimisations plus faciles \`a
-effectuer pour le compilateur, meilleures performances \footnote{Ceci est de plus en plus discutable, cf les derniers benchmarks http://shootout.alioth.debian.org/, il faut être très prudent lorsque l'on parle de performances}), et des inconv\'enients
+effectuer pour le compilateur, meilleures performances \footnote{Ceci est de plus en plus discutable, cf les derniers benchmarks http://shootout.alioth.debian.org/; il faut de tout manière être très prudent lorsque l'on parle de performances}), et des inconv\'enients
 (obligation de penser "comme la machine", plus grande difficult\'e \`a \'ecrire
 du code robuste, augmentation du temps de d\'eveloppement)
 
@@ -456,5 +628,5 @@ Par exemple,
 int* tableau = new int[40];
 tableau[27] = 42;
 \end{lstlisting}
-\item Tout objet (tableau ou non) construit via l'opérateur new doit être détruit manuellement via l'opérateur delete (ou delete[] dans le cas d'un tableau).
+\item Tout objet (tableau ou non) construit via l'opérateur new doit être détruit manuellement via l'opérateur delete (ou delete[] dans le cas d'un tableau). Cette destruction manuelle peut être déléguée dans un destructeur, mais il faut alors prendre garde aux constructeurs-copie et à la surcharge de l'opérateur =.
 \end{itemize} 

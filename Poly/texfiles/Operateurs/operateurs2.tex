@@ -12,7 +12,10 @@
 \label{chapter:operateurs}
 
 \section{Introduction}
-Dans le chapitre pr\'ec\'edent, nous avons \'ecrit un objet Accumulator, qui permettait de collecter une grande quantit\'e de nombres pour en calculer des statistiques \'el\'ementaires. Nous souhaiterions maintenant pouvoir assembler ("merger" dans la langue de Shakespeare) deux instances de cette classe en une troisi\'eme instance, qui serait dans le même état que si elle avait résumé tous les nombres présentés aux deux premières instances. Dans ce but, nous pouvons écrire une fonction Merge :
+
+La surcharge d'opérateurs consiste à donner du sens à l'utilisation d'opérateurs comme \textbf{+, *, (),} etc. appliqués à des types non primitifs. Cette surcharge permet donc aux opérateurs du C++ d'avoir une signification particulière pour des types spécifiques.\\
+
+Dans le chapitre pr\'ec\'edent, nous avons \'ecrit un objet \classname{Accumulator}, qui permettait de collecter une grande quantit\'e de nombres pour en calculer des statistiques \'el\'ementaires. Nous souhaiterions maintenant pouvoir assembler ("merger" dans la langue de Shakespeare) deux instances de cette classe en une troisi\'eme instance, qui serait dans le même état que si elle avait résumé tous les nombres présentés aux deux premières instances. Dans ce but, nous pouvons écrire une fonction \functionname{Merge} :
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}[caption = Accumulator.h]
@@ -80,7 +83,7 @@ void main()
 
 \end{lstlisting}\end{DDbox}
 
-Ce code a deux défauts mineurs. Tout d'abord, il pourrait être rendu plus compact. Plus gênant, il donne une impression d'assymétrie entre les instances acc1 et acc2, qui ont pourtant des rôles parfaitement symétriques. Nous voudrions pouvoir remplacer cette syntaxe par quelquechose de la sorte :\\
+Ce code a deux défauts mineurs. Tout d'abord, il pourrait être rendu plus compact. Plus gênant, il donne une impression d'assymétrie entre les instances \varname{acc1} et \varname{acc2}, qui ont pourtant des rôles parfaitement symétriques. Nous voudrions pouvoir remplacer cette syntaxe par quelquechose de la sorte :\\
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}[caption = main.cpp]
@@ -102,7 +105,7 @@ void main()
 
 \end{lstlisting}\end{DDbox}
 
-Cette syntaxe est rendue possible en C++ par la définition d'un opérateur. Il faut appréhender en première approche les opérateurs comme des fonctions membres, c'est à dire des méthodes. Nous allons donc définir notre opérateur comme s'il s'agissait d'une fonction membre à part entière, en ajoutant seulement le mot clef "operator" :
+Cette syntaxe est rendue possible en C++ par la surcharge de l'opérateur \textbf{+} pour la classe \classname{Accumulator}. Il faut appréhender en première approche les opérateurs comme des fonctions membres, c'est à dire des méthodes. Nous allons donc définir notre opérateur comme s'il s'agissait d'une fonction membre à part entière, en ajoutant seulement le mot clef "operator" :\\
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}[caption = Accumulator.h]
@@ -303,7 +306,7 @@ Pour empêcher cette utilisation (qui mène au complexe $1 + \frac{\pi}{2}i$), nou
 \begin{itemize}
 \item Tout d'abord, nous mettons les constructeurs de notre classe en private, afin de nous assurer qu'ils ne pourront plus être utilisés directement.
 \item Ensuite, nous proposons des méthodes publiques static dont la fonction sera de construire une instance d'une manière spécifique.
-\item L'utilisateur peut et doit alors passer par ces méthodes pour construire un complexe.\\ 
+\item L'utilisateur peut et doit alors passer par ces méthodes pour construire un complexe.\\
 \end{itemize}
 
 \begin{DDbox}{\linewidth}
@@ -424,6 +427,76 @@ void main()
 {
     Complex c1 = Complex::FromPolar(1,Pi/2);
     Complex c2 = Complex::FromCartesian(0,1);
+}
+\end{lstlisting}\end{DDbox}
+
+\section{Surcharge de l'opérateur d'affectation}
+
+Lorsque nous écrivons le code du listing \ref{lst:affectation1}, nous utilisons l'implémentation de l'opérateur \textbf{=} pour les entiers. Cette implémentation spécifie qu'après la ligne "a=b;", a et b sont deux instances d'entiers, désignant chacune un entier distinct, mais qui possèdent la même valeur. Ainsi, nous aurions comme représentation sur la Stack quelquechose d'analogue au graphique \ref{fig:operator=Int}.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = affectation d'un entier par un autre, label=lst:affectation1]
+void main()
+{
+    int a = 3;
+    int b = 2;
+    b=a;
+}
+\end{lstlisting}\end{DDbox}
+
+\begin{figure}[]
+	\begin{center}
+		\includegraphics[scale=0.5]{../../Pictures/operator=Int.pdf}
+	\end{center}
+	\caption{Copie de b en a, cas des entiers.}
+	\label{fig:operator=Int}
+\end{figure}
+
+Lorsque nous voulons écrire la même chose pour des \classname{Complex}, que se passe-t-il ?\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = affectation d'un Complex par un autre, label=lst:affectation2]
+#include "Complex.h"
+void main()
+{
+    Complex c1 = Complex::FromCartesian(1,0);
+    Complex c2 = Complex::FromCartesian(0,1);
+    c1=c2;
+}
+\end{lstlisting}\end{DDbox}
+
+Dans le listing \ref{lst:affectation2}, \varname{c1} et \varname{c2} sont deux instances de type Complex différentes, mais dont les champs \varname{\_real} et \varname{\_im} ont mêmes valeurs, \textit{i.e.} \varname{c1.\_real = c2.\_real} et \varname{c1.\_im = c2.\_im} après exécution de l'opérateur \textbf{=}. Cet état est également décrit par le graphique \ref{fig:operator=Complex}. Que ce soit dans le cas des entiers ou dans le cas des Complexs, il est très important de noter et de retenir\footnote{Car c'est un comportement très différent de celui dans des langages comme le C\# ou le Java par exemple.} que si nous écrivons à la suite de l'affectation \varname{b=a;} (resp. \varname{c1=c2;}) l'instruction :  \varname{a=1;} (resp. \varname{c1 = Complex::FromCartesian(1,1)}), les valeurs de \varname{b} et \varname{c2} restent inchangées.\\
+
+\begin{figure}[]
+	\begin{center}
+		\includegraphics[scale=0.5]{../../Pictures/operator=Complex.pdf}
+	\end{center}
+	\caption{Copie de b en a, cas des Complexs.}
+	\label{fig:operator=Complex}
+\end{figure}
+
+Comment le langage réalise-t-il donc l'affectation (opérateur \varname{=}) d'une instance de type non primitif en une autre ? Par défaut, son comportement est très exactement le même que le constructeur-copie par défaut : l'environnement va copier octet par octet tous les champs de l'instance source dans l'instance cible.\\
+
+En règle générale, c'est un comportement raisonnable, et nous pouvons dans la plupart des cas laisser cette implémentation par défaut de l'opérateur \varname{=}. Cependant, nous verrons que lorsque l'un des champs à recopier est un pointeur, l'implémentation par défaut de l'opérateur \textbf{=} peut se révéler très dangereuse, et nous voudrons dans ces cas-là la redéfinir nous-même explicitement. Afin de comprendre comment la redéfinir, nous donnons dans le listing \ref{lst:affectation3}, à titre d'exemple, une redéfinition explicite de l'opérateur \textbf{=} qui se contente de mimer fidèlement l'implémentation implicite par défaut, c'est à dire qui recopie les champs valeur par valeur.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = première surcharge de l'opérateur d'affectation, label=lst:affectation3]
+void Complex::operator=(const Complex& source)
+{
+	_real = source._real;
+	_im = source._im;
+}
+\end{lstlisting}\end{DDbox}
+
+Traditionnellement, et pour des raisons que nous ne détaillons pas ici\footnote{penser qu'on veut pouvoir écrire \textbf{c1=c2=c3;}}, cet opérateur doit en réalité retourner la nouvelle valeur de l'instance modifiée. Pour faire celà, l'instance "appelante" doit donc se retourner elle-même. Cette opération est possible via l'utilisation du mot clef \classname{this}, qui, appelé dans une méthode de classe, retourne un pointeur sur l'objet qui appelle la méthode. Nous pouvons donc dans une méthode récupérer l'objet "appelant" par "\textbf{*this}", comme dans le listing \ref{lst:affectation4}.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = surcharge canonique de l'opérateur d'affectation, label=lst:affectation4]
+Complex& Complex::operator=(const Complex& source)
+{
+	_real = source._real;
+	_im = source._im;
+    return *this; 
 }
 \end{lstlisting}\end{DDbox}
 
