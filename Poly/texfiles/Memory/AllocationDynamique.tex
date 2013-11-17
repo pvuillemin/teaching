@@ -9,7 +9,7 @@ Comme nous l'avons vu dans la section \ref{sec:stack}, la zone mémoire dédiée à 
 Il existe deux cas de figure dans lesquels nous ne pouvons/souhaitons pas utiliser la Stack pour stocker de la mémoire :\\
 
 \begin{enumerate}
-\item Lorsque nous souhaitons créer un objet dont le scope excède celui de la fonction dans laquelle il est créé. Si l'objet est stocké dans une Stack Frame, il sera détruit en même temps que celle-ci, il va donc falloir le stocker dans un autre espace.
+\item Lorsque nous souhaitons créer un objet dont le scope excède celui de la fonction dans laquelle il est créé. Si l'objet est stocké dans une Stack Frame, il sera détruit en même temps que celle-ci, il va donc falloir le stocker dans un autre espace pour le maintenir en vie plus longtemps.
 \item Lorsque nous souhaitons créer un tableau dont la taille n'est pas connue à la compilation, voir même n'est pas connue à l'entrée de la fonction. Ce tableau ne peut donc être contenu dans une Stack Frame, puisqu'à la construction de cette Stack Frame, sa taille est encore inconnue.\\ 
 \end{enumerate}
 
@@ -42,7 +42,7 @@ void main()
 \end{lstlisting}
 \end{DDbox}
 
-Dans la fonction f, l'usage du mot clef \varname{new} nous permet d'instancier une variable de type A qui sera stockée dans la Heap et non pas sur la Stack. La création d'une instance de type A sur la Heap via le mot clef new retourne un pointeur de type A*, pointeur stocké sur la Heap. Ce pointeur permet d'accéder à cette instance de type A nouvellement créée. Juste avant la sortie de la fonction f, notre mémoire est donc dans l'état du graphique \ref{fig:stack8}.\\
+Dans la fonction \functionname{f}, l'usage du mot clef \varname{new} nous permet d'instancier une variable de type A qui sera stockée dans la Heap et non pas sur la Stack. La création d'une instance de type A sur la Heap via le mot clef new retourne un pointeur de type A*, pointeur stocké dans la Stack Frame de \functionname{f}. Ce pointeur permet d'accéder à cette instance de type A nouvellement créée. Juste avant la sortie de la fonction f, notre mémoire est donc dans l'état du graphique \ref{fig:stack8}.\\
 
 \begin{figure}[]
 	\begin{center}
@@ -52,15 +52,16 @@ Dans la fonction f, l'usage du mot clef \varname{new} nous permet d'instancier u
 	\label{fig:stack8}
 \end{figure}
 
-Comme A est un type non primitif, la construction d'un A nécessite d'appeler un constructeur. Dans le cas présent, c'est le constructeur par défaut qui est appelé (en raison de l'absence d'argument). Si nous voulions procéder à l'instanciation d'un objet de type A via un autre constructeur, nous pourrions par exemple écrire : \\
+Comme A est un type non primitif, la construction d'un A nécessite d'appeler un constructeur. Dans le cas présent, c'est le constructeur par défaut qui est appelé (en raison de l'absence d'argument). Si nous voulions procéder à l'instanciation d'un objet de type A via un autre constructeur, nous pourrions par exemple écrire le code du listing \ref{newWithSpecificConstructor}. \\
 
 \begin{DDbox}{\linewidth}
-\begin{lstlisting}[caption=Exemple d' appel  \`a \texttt{new}]
+\begin{lstlisting}[caption=Exemple d' appel  \`a \texttt{new} en donnant un argument au constructeur-copie, label = newWithSpecificConstructor]
 class A
 {
     public:
         A(int i);
         ~A();
+        void Display();
 };
 
 void f()
@@ -78,14 +79,16 @@ void main()
 \end{lstlisting}
 \end{DDbox}
 
-Des exemples non triviaux de cas où l'allocation dynamique est nécessaire sont données en fin de chapitre. 
+Des exemples non triviaux de cas où l'allocation dynamique est nécessaire sont donnés en fin de chapitre. 
+
+\section{Les 3 problèmes de l'allocation dynamique de mémoire}
 
 \subsection{Nettoyage de la m\'emoire}
 
 Nous savons \`a pr\'esent allouer de la m\'emoire selon nos besoins, en cours
 d'ex\'ecution du programme. Qu'advient-il de cette m\'emoire allou\'ee  lorsque notre
 code ne l'utilise plus? La r\'eponse est simple : elle reste allou\'ee. Pour
-cela, nous devons comprendre ce qui se passe lorsque nous allouons de la
+cela, nous devons détailler plus avant le processus d'allocation de la
 m\'emoire.\\
 
 L'OS (syst\`eme d'exploitation) d'un ordinateur
@@ -94,7 +97,7 @@ faire cohabiter les diff\'erents programmes tournant simultan\'ement les uns
 avec les autres. En particulier, lui seul dispose d'un contr\^ole total sur la
 m\'emoire de l'ordinateur. En pratique, chaque fois qu'un programme  demande de
 la m\'emoire au moyen d'une instruction \texttt{new} ou similaire, c'est en
-fait au syst\`eme d'exploitation qu'il la demande. Celui ci r\'eserve alors une
+fait au syst\`eme d'exploitation qu'il la demande. Celui-ci r\'eserve alors une
 zone, et la marque comme appartenant au programme demandant la m\'emoire.\\
 
 Pendant l'ex\'ecution du programme, l'OS n'a \emph{aucune} raison de d\'esallouer la
@@ -103,16 +106,16 @@ pourrait tr\`es bien imaginer des cas dans lesquels un utilisateur a lanc\'e
 une trentaine de programme simultan\'ement qui consomment tous beaucoup de
 m\'emoire, et o\`u l'OS aurait int\'er\^et, voire besoin de lib\'erer de la
 m\'emoire. Cependant, il ne le fera jamais. Certains langages (Java, Python,
-Pascal, VBA, etc.) fournissent un  m\'ecanisme de nettoyage automatique
+Pascal, etc.) fournissent un  m\'ecanisme de nettoyage automatique
 \footnote{appel\'e Garbage-Collector, ou \textit{ramasse miette en Français}} de la mémoire qui n'est plus utilisée,
 mais ce n'est pas le cas du C++ \footnote{Au moins à notre niveau}.\\
 
-Afin d'\'eviter ce genre de situation, la mémoire allouée dans un programme doit \emph{toujours} être lib\'erée dès qu'elle n'est plus utilisée, faute de quoi elle encombrera la mémoire jusqu'à ce que le programme se termine ou meurt, un encombrement appelé \varname{Memory Leak} ou \varname{Fuite Mémoire}. 
+Afin d'\'eviter ce genre de situation, la mémoire allouée dans un programme doit \emph{toujours} être lib\'erée dès qu'elle n'est plus utilisée, faute de quoi elle encombrera la mémoire jusqu'à ce que le programme se termine ou meurt, un encombrement appelé \varname{Memory Leak} ou \varname{Fuite Mémoire}. \\
 
-A la différence de la mémoire allouée sur la stack qui est automatiquement libérée par l'environnement, la mémoire allouée sur la Heap doit donc être libérée manuellement et explicitement afin d'éviter ces Memory Leaks. Pour ce faire, nous notifions donc explicitement l'environnement lorsque nous souhaitons qu'il détruise une telle instance. Cette notification est réalisée au moyen de l'instruction \texttt{delete}. Delete est une opérateur qui prend en argument un pointeur pointant sur une instance allouée sur la Heap, qui déréférence ce pointeur, détruit l'instance pointée en appelant le destructeur correspondant, puis libère la mémoire correspondante de la Heap. L'instruction prend donc la forme suivante :\\
+A la différence de la mémoire allouée sur la Stack qui est automatiquement libérée par l'environnement, la mémoire allouée sur la Heap doit donc être libérée manuellement et explicitement afin d'éviter ces Memory Leaks. Pour ce faire, nous notifions donc explicitement l'environnement lorsque nous souhaitons qu'il détruise une telle instance. Cette notification est réalisée au moyen de l'instruction \texttt{delete}. \texttt{delete} est un opérateur qui prend en argument un pointeur pointant sur une instance allouée sur la Heap, qui déréférence ce pointeur, détruit l'instance pointée en appelant le destructeur correspondant, puis libère la mémoire correspondante de la Heap. L'instruction prend donc la forme suivante :\\
 
 \begin{DDbox}{\linewidth}
-\begin{lstlisting}[caption=Exemple d' appel  \`a \texttt{new}]
+\begin{lstlisting}[caption=Exemple d' appel  \`a \texttt{delete}]
 void f()
 {
     int n = 8;
@@ -133,6 +136,7 @@ l'oublier, et donc d'\'eviter bien des probl\`emes plus tard.
 \end{habitudes}
 
 \subsection{Segmentation Fault}
+\label{sec:segFault}
 
 Lorsque nous appelons \functionname{delete} sur le pointeur \varname{pa}, l'instance pointée par pa est détruite, mais nous disposons toujours du pointeur, qui lui ne sera détruit que lorsque la Stack Frame dans lequel il est contenu sera détruite. Ainsi, par erreur, nous pourrions désallouer par deux fois une même zone mémoire de la Heap en appelant deux fois \functionname{delete} sur \varname{pa}.\\
 
@@ -152,7 +156,7 @@ Si nous exécutons ce code, nous obtenons une erreur au RunTime qui tue notre app
 
 \begin{figure}[]
 	\begin{center}
-		\includegraphics[scale=0.5]{../../Pictures/SegFault}
+		\includegraphics[scale=0.5]{../../Pictures/SegFault.jpg}
 	\end{center}
 	\caption{Screenshot d'une fenêtre d'erreur générée par une Segmentation Fault.}
 	\label{fig:segFault}
@@ -160,10 +164,10 @@ Si nous exécutons ce code, nous obtenons une erreur au RunTime qui tue notre app
 
 Les erreurs de Segmentation Fault sont particulièrement coûteuses, car elles sont complexes à répliquer et à isoler. Elles participent largement à faire du C++ un langage complexe et laborieux.\\
 
-Donnons maintenant un exemple classique de Segmentation Fault. Nous construisons par composition un objet \varname{B} qui possède un objet \varname{A} construit dynamique dans le constructeur de \varname{B}. Par symétrie, il semble assez naturel d'assurer la libération de la mémoire de la Heap dans le destructeur de \varname{B}. En effet, puisque l'instance de type \varname{A} n'est pointée que par \varname{B}, elle devient superflue à la mort de \varname{B}, et peut donc être détruite dans le destructeur de \varname{B}. Ce design semble une excellente pratique, puisque nous n'avons plus à nous soucier de la libération de \varname{A} : c'est à la destruction automatique de \varname{B} que \functionname{delete} sera appelé et que le destructeur de \varname{A} sera appelé subséquemment et automatiquement.\\
+Donnons maintenant un cas classique où la Segmentation Fault apparaît naturellement. Nous construisons par composition un objet \varname{B} qui possède un objet \varname{A} construit dynamiquement dans le constructeur de \varname{B}. Pour lutter contre les problèmes de Memory Leak, il semble assez naturel d'assurer la libération de la mémoire de la Heap dans le destructeur de \varname{B}. En effet, puisque l'instance de type \varname{A} n'est pointée que par \varname{B}, elle devient superflue à la mort de \varname{B}, et peut donc être détruite dans le destructeur de \varname{B}. Ce design semble une excellente pratique, puisque nous n'avons plus à nous soucier de la libération de \varname{A} : c'est à la destruction automatique de \varname{B} que \functionname{delete} sera appelé et que le destructeur de \varname{A} sera appelé subséquemment et automatiquement.\\
 
 \begin{DDbox}{\linewidth}
-\begin{lstlisting}[caption=Exemple d' appel  \`a \texttt{new}]
+\begin{lstlisting}[caption=Un cas classique de SegFault]
 class A
 {
 public:
@@ -194,6 +198,58 @@ B::~B(void)
 
 \end{lstlisting}
 \end{DDbox}
+
+Cependant, si dans le code précédent nous passons par valeur l'instance de type \classname{B} en argument d'une fonction \functionname{f}, le constructeur-copie va recopier l'instance de type \classname{B} en une autre, et ces deux instances possèderont chacune un pointeur \varname{\_pa} possédant la même valeur, c'est à dire pointant sur le même objet de la Heap. Le code correspondant est décrit dans le listing \ref{SegFault} et l'état de la mémoire en entrant dans la fonction \functionname{f} est schémarisé dans le graphique \ref{fig:segFaultScheme}.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption=Un cas classique de SegFault, label=SegFault]
+
+void f(B copy)
+{
+
+}
+
+void main()
+{
+    B b;
+    f(b);
+}
+
+\end{lstlisting}
+\end{DDbox}
+
+\begin{figure}[]
+	\begin{center}
+		\includegraphics[scale=0.5]{../../Pictures/SegFault.pdf}
+	\end{center}
+	\caption{b et copy possèdent chacun un pointeur qui référence l'instance de type A.}
+	\label{fig:segFaultScheme}
+\end{figure}
+
+Lorsque la fonction \functionname{f} s'achève, sa Stack Frame est détruite, le destructeur de \varname{copy} est appelé automatiquement, celui-ci déréférence le pointeur \varname{\_pa} de \varname{copy} et désalloue l'instance pointée, c'est à dire l'instance de type \classname{A} présente sur la Heap. Lorsque la fonction \functionname{main} s'achève à son tour, l'instance \varname{b} est à son tour détruite automatiquement, son destructeur est appelé, et celui-ci tente d'appeler \functionname{delete} sur \varname{b.\_pa}, alors que l'instance de type \classname{A} a déjà été détruite, produisant ainsi une Segmentation Fault.\\
+
+\subsection{Dangling Pointers}
+
+Enfin, le troisième risque que comporte la gestion dynamique de mémoire consiste à tenter de déréférencer un pointeur pointant vers une instance déjà détruite. Par exemple, le code du listing \ref{DanglingPointers} mène à un comportement indéfini à l'exécution.\\ 
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption=Exemple d' appel  \`a \texttt{new}, label=DanglingPointers]
+void f()
+{
+    int n = 8;
+    A* pa = new A(n);
+    delete pa;
+    
+    pa->Display();
+}
+\end{lstlisting}
+\end{DDbox}
+
+\section{Smart Pointers}
+
+Nous voudrions donc nous doter d'un pointeur "intelligent", appelé Smart Pointer dans ce qui suit, pour lequel nous avons le comportement d'un pointeur classique (possibilité de déréférencer le Smart Pointer via l'opérateur \texttt{*}, possibilité d'accéder aux champs et méthodes de l'instance pointée directement par l'opérateur \texttt{->}), mais pour lequel nous n'avons pas à gérer l'appel au \functionname{delete}, c'est à dire qu'il gère lui-même l'allocation et la désallocation dynamique de mémoire, sans créer de Memory Leaks ou de SegFault.\\ 
+
+Nous commençons par écrire 
 
 Dans cet exemple, supposons maintenant que 
 
