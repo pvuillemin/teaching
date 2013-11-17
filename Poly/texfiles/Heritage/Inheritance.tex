@@ -386,7 +386,7 @@ Jusqu'à présent, toutes nos classes possédaient des champs publics ou privés de 
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}
-class A 
+class A
 {
     public:
         A();
@@ -398,9 +398,9 @@ class B
     public:
         B(A a);
         ~B();
-        
+
     private:
-        A _a;        
+        A _a;
 };
 
 B::B(A a)
@@ -459,7 +459,7 @@ class A
     public:
         A(A* pa);
         ~A();
-        
+
     private:
         A* _inner;
 };
@@ -472,12 +472,12 @@ A::A(A* pa)
 \end{lstlisting}
 \end{DDbox}
 
-Donnons deux exemples plus concrets de cas d'utilisation.\\ 
+Donnons deux exemples plus concrets de cas d'utilisation.\\
 
 Le premier exemple est une classe \classname{User} correspondant aux informations stockées par utilisateur dans un réseau social. Une des raisons principales des réseaux sociaux étant de pouvoir déclarer au monde que nous sommes passés d'un statut de "single" à "it's complicated with \varname{Trucmuche}", nous voulons pouvoir stocker dans chaque instance un pointeur vers \varname{Trucmuche}. Le code \ref{} en donne un aperçu.\\
 
 \begin{DDbox}{\linewidth}
-\begin{lstlisting}
+\begin{lstlisting}[label = lst:FbUser]
 class FbUser
 {
     public:

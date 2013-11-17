@@ -968,3 +968,101 @@ Les constructeurs statiques peuvent être très utiles lorsque vous souhaitez effe
 toujours le même résultat quelle que soit l'instance créée. L'utilisation d'un constructeur statique peut
 permettre de n'effectuer cette opération qu'une seule fois. Ceci n'est pas possible de cette manière en C++.
 
+
+\section{Constructeur-copie}
+
+Dans la section \ref{sec:arguments}, nous avons expliqué que si nous ne spécifions pas qu'un argument doit être passé par référence, il est par défaut passé par valeur. Ainsi, dans le listing \ref{lst:argumentTypeNonPrimitif}, l'instance \varname{a} de type \classname{A} est passée par valeur à la fonction \functionname{f} alors qu'elle est passée par référence à la fonction \functionname{g}. Nous nous trouvons donc à l'entrée de la fonction \functionname{f}, dans un état de la mémoire comparable à celui du graphique \ref{fig:PassageParValeurTypeNonPrimitif}.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption=passage par valeur et par référence d'un argument de type non-primitif, label=lst:argumentTypeNonPrimitif]
+
+class A
+{
+    public:
+        A(int c, int d);
+        ~A();
+        
+    private:
+        int _c;
+        int _d;
+}
+
+A::A(int c, int d)
+{
+    _c = c;
+    _d = d;
+}
+
+A::~A()
+{
+}
+
+void f(A copy)
+{
+
+}
+
+void g(A& a)
+{
+
+}
+
+void main()
+{
+    A a;
+    f(a);
+    g(a);
+}
+
+\end{lstlisting}
+\end{DDbox}
+
+\begin{figure}[]
+	\begin{center}
+		\includegraphics[scale=0.5]{../../Pictures/PassageParValeurTypeNonPrimitif.pdf}
+	\end{center}
+	\caption{Etat de la Stack en entrant dans la fonction f.}
+	\label{fig:PassageParValeurTypeNonPrimitif}
+\end{figure}
+
+Dans le cas de la fonction \functionname{f}, comment l'environnement réalise-t-il une copie de l'instance \varname{a} en \varname{copy} ? Cette copie est réalisée par l'environnement qui appelle de manière invisible, juste avant d'entrer dans la fonction \functionname{f}, un constructeur spécial, appelé le \textbf{constructeur-copie}. Le constructeur-copie de la classe \classname{A}, comme un constructeur classique, est une méthode membre de la classe correspondante (ici \classname{A}), qui prend en argument une instance source de type \classname{A} qu'il cherche à copier, et en crée une copie, également de type \classname{A}.\\
+
+Tout comme l'environnement implémente par défaut implicitement un constructeur par défaut, il implémente également implicitement un constructeur-copie par défaut. Ce constructeur-copie par défaut se contente de copier octet par octet tous les champs (public, protected comme private) de l'instance source dans les champs correspondants de l'instance cible. Nous pouvons donc expliciter le constructeur-copie de la classe \classname{A} de la sorte : \\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption=Constructeur-copie de la classe A explicité, label=lst:CopyConstructor]
+
+class A
+{
+    public:
+        A(int c, int d);
+        A(const A& source);
+        ~A();
+
+    private:
+        int _c;
+        int _d;
+}
+
+A::A(int c, int d)
+{
+    _c = c;
+    _d = d;
+}
+
+A::A(const A& source)
+{
+    _c = source._c;
+    _d = source._d;
+}
+
+A::~A()
+{
+}
+
+\end{lstlisting}
+\end{DDbox}
+
+\warning{Notez bien que le constructeur-copie prend son argument par référence (sinon il faudrait appeler le constructeur-copie avant de rentrer dans le constructeur-copie, et il faudrait appeler le constructeur-copie avant de rentrer dans le constructeur-copie pour rentrer dans le constructeur-copie, et ainsi de suite.)\\}
+
+Dans l'exemple ci-dessus, nous avons explicité le constructeur-copie pour répliquer parfaitement le comportement implicite donné par défaut à ce dernier par l'environnement. Nous rencontrerons dans la chapitre \ref{chap:memory1} des exemples de cas dans lesquels il est nécessaire de donner un sens plus spécifique à ce constructeur-copie.\\ 
