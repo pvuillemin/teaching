@@ -10,7 +10,7 @@
 
 Comme nous l'avons expliqué précédemment, le C++ permet à la fois de manipuler des abstractions puissantes mais aussi d'être très proche de la machine quand celà est nécessaire. Dans ce chapitre, nous nous plaçons à un niveau d'abstraction très bas pour présenter les pointeurs.\\
 
-Chaque variable d'un programme est stockée dans une des mémoires de la machine qui exécute le code (mémoire Cache, mémoire RAM, disque dur, etc.). Nous pouvons considérer la mémoire de notre machine comme un ensemble de cases mémoires contigües, chacune d'un octet. Chaque case est numérotée, afin de pouvoir rapidement accéder à une case précise. Lorsque nous écrivons :\\
+Chaque variable d'un programme est stockée dans une des mémoires de la machine qui exécute le code (mémoire Cache, mémoire RAM, disque dur, etc.). Nous pouvons pour le moment considérer la mémoire de notre machine comme un ensemble de cases mémoires contigües, chacune d'un octet. Chaque case est numérotée, afin de pouvoir rapidement accéder à une case précise. Lorsque nous écrivons :\\
 
 \begin{DDbox}{\linewidth}\begin{lstlisting}
 unsigned int n=3;
@@ -71,6 +71,7 @@ Nous venons de voir deux utilisations distinctes du symbole * :
 \item lors de la déclaration d'un pointeur, il spécifie que la variable pb par exemple est un pointeur sur double.
 \item lors de la déréférenciation, c'est l'opérateur * qui associe à un pointeur la variable vers laquelle le pointeur renvoie.
 \end{enumerate}
+Il s'agit donc d'une homonymie de l'opérateur *, à laquelle il faut prendre garde lorsque l'on débute.
 \end{warning}
 
 \section{Opérateurs \& et *}

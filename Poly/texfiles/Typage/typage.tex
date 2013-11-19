@@ -6,7 +6,7 @@
 
 \textit{Vous êtes familiers avec les mots clefs int, short, long, double et float, et avec la base 2 ? sautez ce chapitre en première lecture.}\\
 
-\textit{Remarque préliminaire} : L'alphabet d'un ordinateur est limité aux signes 0 et 1, ce qui correspond à une porte électronique ouverte ou fermée, et cet état est représenté par 1 bit. Avec un ensemble de n bits, nous pouvons former $2^n$ combinaisons différentes, et donc stocker au plus $2^n$ valeurs différentes. Toutes les variables ont besoin de plusieurs bits pour définir leur valeur, et l'unité de référence pour la taille mémoire est l'octet (byte en anglais), c'est à dire un paquet de 8 bits consécutifs \footnote{On prendra donc bien garde à ne pas confondre bit et byte (=8 bits). Certains providers internet abusent d'ailleurs de cette confusion en affichant les débits garantis en terme de Mbits/secs, c'est pourquoi vous avez une connection de 100 Mbits, mais que vous ne téléchargez pas à plus de quelques Mo/sec ...}. Dans ce chapitre, nous faisons un bref rappel des systèmes de base et introduisons les différents types primitifs du C++.
+\textit{Remarque préliminaire} : L'alphabet d'un ordinateur est limité aux signes 0 et 1, ce qui correspond à une porte électronique ouverte ou fermée, et cet état est représenté par un bit. Avec un ensemble de n bits, nous pouvons former $2^n$ combinaisons différentes, et donc stocker au plus $2^n$ valeurs différentes. Toutes les variables ont besoin de plusieurs bits pour définir leur valeur, et l'unité de référence pour la taille mémoire est l'octet (byte en anglais), c'est à dire un paquet de 8 bits consécutifs \footnote{On prendra donc bien garde à ne pas confondre bit et byte (=8 bits). Certains providers internet abusent d'ailleurs de cette confusion en affichant les débits garantis en terme de Mbits/secs, c'est pourquoi vous avez une connection de 100 Mbits, mais que vous ne téléchargez pas à plus de quelques Mo/sec ...}. Dans ce chapitre, nous faisons un bref rappel des systèmes de base et introduisons les différents types primitifs du C++.
 
 \section{Représentation décimale}
 
@@ -25,7 +25,7 @@ Quelques exemples :
 
 \section{les nombres négatifs}
 
-Comment représenter un nombre négatif ?  Comme il n'y a que deux possibilités pour un nombre (positif ou négatif), le signe d'un nombre peut être représenté sur un bit. Par convention, le bit de gauche d'un ensemble de bits est le bit de signe : sa valeur (0 ou 1) détermine le signe du nombre stocké dans les bits suivants. Celà diminue donc d'une unité le nombre de bits disponibles pour stocker le nombre lui-même. Lorsque l'on travaille uniquement avec des nombres positifs, il est possible de signifier à la machine que nous voulons faire l'économie du bit de signe pour pouvoir travailler sur des valeurs potentiellement plus grandes. Nous reviendrons sur ce point en dessous.
+Comment représenter un nombre négatif ?  Comme il n'y a que deux possibilités pour un nombre (positif ou négatif), le signe d'un nombre peut être représenté sur un bit. Par convention, le bit de gauche d'un ensemble de bits est le bit de signe : sa valeur (0 ou 1) détermine le signe du nombre stocké dans les bits suivants. Celà diminue donc d'une unité le nombre de bits disponibles pour stocker le nombre lui-même. Lorsque l'on travaille uniquement avec des nombres positifs, il est possible de signifier à la machine que nous voulons faire l'économie du bit de signe pour pouvoir travailler sur des valeurs potentiellement plus grandes. Nous revenons sur ce point au paragraphe suivant.
 
 \section{les entiers}
 
@@ -81,7 +81,7 @@ Nous invitons le lecteur à prendre l'habitude de ne travailler uniquement qu'ave
 
 \section{Les réels}
 
-Les nombres décimaux sont stockés autrement que les nombres entiers. Ils sont dits à virgule flottante. Les nombres à virgule flottante sont des nombres dans lesquels la position de la virgule en tant que séparateur entre partie entière et partie décimale n'est pas figée. La grandeur d'un tel nombre est donnée par un exposant de 10 adéquat. Par exemple, le nombre 27,6 peut être écrit sous les 3 formes :
+Les nombres réels sont stockés autrement que les nombres entiers. Ils sont dits à virgule flottante. Les nombres à virgule flottante sont des nombres dans lesquels la position de la virgule en tant que séparateur entre partie entière et partie décimale n'est pas figée. La grandeur d'un tel nombre est donnée par un exposant de 10 adéquat. Par exemple, le nombre 27,6 peut être écrit sous les 3 formes :
 
 \begin{align*}
 2,76 * 10^1\\
@@ -128,7 +128,7 @@ Toutes vos variables, comme tous vos fichiers, vos méthodes et vos commentaires 
 \end{habitudes}
 
 \begin{habitudes}[Nom des variables (2)]
-Trouvez des noms courts, expressifs, spécifiques et non-provoquants (On est jamais à l'abri d'un bug qui soulève un retour windows en expliquant que l'instance z de la classe fuckstring n'a pas été instanciée, devant un client/n+1/examinateur...). Une exception : pour coder une fonction mathématique, ces conseils sont différents, préférez des noms de variables très courts à des noms expressifs, du type x, y, z, dx...
+Trouvez des noms courts, expressifs, spécifiques et non-provoquants (On est jamais à l'abri d'un bug qui soulève un retour windows en expliquant que l'instance z de la classe fuckstring n'a pas été instanciée, devant un client/n+1/examinateur...). Une exception : pour coder une fonction mathématique, ces conseils sont différents, préférez des noms de variables très courts à des noms expressifs, du type x, y, z, dx, etc.
 \end{habitudes}
 
 Le listing suivant présente quelques exemples de déclaration de variables.\\
@@ -156,7 +156,7 @@ bool   isLocked;
 \end{table}
 
 
-\warning Il est important de noter que les noms des variables sont sensibles à la casse (case sensitive)\footnote{C'est-\`a-dire \`a la distinction entre majuscules et minuscules}. En d'autres termes, cela signifie que \varname{Variable1} et \varname{variable1} d\'esignent deux variables diff\'erentes. \textbf{Nous attirons votre attention sur cette propriété, qui sera source dans vos premiers programmes des trois quarts des erreurs de compilation que vous rencontrerez.}
+\warning Il est important de noter que les noms des variables sont sensibles à la casse (case sensitive)\footnote{C'est-\`a-dire \`a la distinction entre majuscules et minuscules.}. En d'autres termes, cela signifie que \varname{Variable1} et \varname{variable1} d\'esignent deux variables diff\'erentes. \textbf{Nous attirons votre attention sur cette propriété, qui sera source dans vos premiers programmes des trois quarts des erreurs de compilation que vous rencontrerez.}
 
 \begin{habitudes}[Usage des majuscules]
 
@@ -170,7 +170,7 @@ Par convention,
 \item lorsqu'un nom est la concaténation de plusieurs mots, la première lettre de chaque mot en dehors du premier prend une majuscule (ex: PerfectRedWidget).
 \end{itemize}
 
-Ces règles permettent de distinguer d'un seul coup d'oeil variables, classes et méthodes et sont indispensables\footnote{Nous nous acharnerons sur vous en TD si vous ne les respectez pas}. Elles permettent aussi de pouvoir recourir au type de syntaxe suivant, dans lequel le premier mot désigne le type et le deuxième mot désigne le nom de l'instance :\\
+Ces règles permettent de distinguer d'un seul coup d'oeil variables, classes et méthodes et sont indispensables\footnote{Nous nous acharnerons sur vous en TD si vous ne les respectez pas.}. Elles permettent aussi de pouvoir recourir au type de syntaxe suivant, dans lequel le premier mot désigne le type et le deuxième mot désigne le nom de l'instance :\\
 
 \begin{DDbox}{\linewidth}\begin{lstlisting}
 Widget widget;
@@ -184,7 +184,7 @@ Les variables de type \keyword{booléen} contiennent un booléen, c'est à dire une
 
 \section{Les caractères}
 
-Il y a malheureusement plusieurs standards différents dans l'encodage des caractères\footnote{c.f. par exemple http://www.joelonsoftware.com/articles/Unicode.html}, tout comme il y a plusieurs types de clavier et plusieurs alphabets. C'est pourquoi vous récupérez parfois des mails avec des caractères étranges quand vous êtes sur des OS différents. Sur un octet, nous pouvons stocker 256 caractères différents. Un des standards les plus utilisés est le standard américain, ASCII. La variable caractère est désignée par le mot clef char, mais sauf cas de force majeur, utilisez plutôt des chaines de caractères représentées (string) que des tableaux de char.
+Il y a malheureusement plusieurs standards différents dans l'encodage des caractères\footnote{c.f. par exemple http://www.joelonsoftware.com/articles/Unicode.html}, tout comme il y a plusieurs types de clavier et plusieurs alphabets. C'est pourquoi vous récupérez parfois des mails avec des caractères étranges quand vous êtes sur des OS différents par exemple. Sur un octet, nous pouvons stocker 256 caractères différents. Un des standards les plus utilisés est le standard américain, ASCII. La variable caractère est désignée par le mot clef char, mais sauf cas de force majeur, utilisez plutôt des chaines de caractères représentées (string) que des tableaux de char.
 
 \section{Types définis par l'utilisateur}
 
@@ -195,7 +195,7 @@ Par exemple :\\
 Identifier identifier = myInstance.GetId();
 \end{lstlisting}\end{DDbox}
 
-Pour la définition de telles variables, nous approfondirons la question au chapitre dédié aux classes.\\
+Pour la définition de telles variables, nous approfondirons la question dans le chapitre dédié aux classes.\\
 
 \section{Constantes et \'enum\'erations}
 \subsection{Constantes}
@@ -255,17 +255,17 @@ La num\'erotation\footnote{Ce n'est d'ailleurs pas forc\'ement 1, 2, 3, etc.} es
 	}
 \end{lstlisting}\end{DDbox}
 
-Le listing \ref{lst:besoinenum.cpp} devient alors:\\
+Le listing \ref{lst:besoinenum.cpp} devient alors :\\
 
 \includecodecaption{besoinenumresolu.cpp}{Emploi d'une \'enum\'eration}
 
-L'emploi d'une \'enum\'eration a donc r\'esolu nos probl\`emes :
+L'emploi d'une \'enum\'eration a donc r\'esolu nos probl\`emes :\\
 
 \begin{itemize}
 
-	\item Un mécanisme garantit que c'est bien une valeur valable qui sera passée en argument de la fonction f
+	\item Un mécanisme garantit que c'est bien une valeur valable qui sera passée en argument de la fonction f.
 	\item Nous pouvons rajouter de nouvelles valeurs sans nous pr\'eoccuper de la
-		num\'erotation;
+		num\'erotation.
 	\item Le code obtenu est nettement plus lisible.
 		
 \end{itemize}
@@ -289,7 +289,7 @@ double someArray[ 50 ];
 \end{lstlisting}
 \end{DDbox}
 
-permet de d\'eclarer un tableau de 50 nombres d\'ecimaux en double pr\'ecision.\\
+permet de d\'eclarer un tableau de 50 nombres réels en double pr\'ecision.\\
 
 Nous acc\`edons alors aux \'el\'ements du tableau \`a l'aide de l'op\'erateur \texttt{[ ]}. Pour cr\'eer un tableau
 de 10 \'el\'ements et y ranger les carr\'es des entiers de 1 \`a 10, nous \'ecririons:\\
@@ -336,6 +336,8 @@ next i
     \end{minipage}
 \end{center}
 
+Pour créer un tableau dont la taille n'est pas une constante écrite nommément dans le code, c'est beaucoup plus difficile; nous reviendrons sur ce point dans le chapitre \ref{chapter:memory}.\\
+
 \section{Le typage du C++}
 
-Le C++ est un langage typ\'e de mani\`ere statique. Cela signifie que les variables doivent \^etre d\'eclar\'ees et leur types explicit\'es, à la différence par exemple du python où une variable peut contenir successivement un entier puis une chaîne de caractère ou un double. Le compromis qui se cache derrière ce choix est un compromis souplesse / performance. Devoir déterminer à l'exécution le type d'une variable plutôt que de l'avoir déterminé statiquement a un certain coût. Les types n'existent en C++ qu'à la compilation, c'est à dire qu'à l'execution il n'est plus possible de récupérer le type d'un objet; cette limitation ne se retrouve pas dans des langages plus récents comme le C\#.\footnote{En C\#, on peut par exemple récupérer le type d'un objet à l'exécution, parcourir l'ensemble des types chargés en mémoire, sélectionner les types qui héritent de telle classe et qui possèdent un constructeur vide, les instancier, etc.}.
+Le C++ est un langage typ\'e de mani\`ere statique. Cela signifie que les variables doivent \^etre d\'eclar\'ees et leur types explicit\'es, à la différence par exemple du python où une même variable peut contenir successivement un entier puis une chaîne de caractère ou un double. Le compromis qui se cache derrière ce choix est un compromis souplesse / performance et garantie. Devoir déterminer à l'exécution le type d'une variable plutôt que de l'avoir déterminé statiquement a un certain coût. Les types n'existent en C++ qu'à la compilation, c'est à dire qu'à l'execution il n'est plus possible de récupérer le type d'un objet; cette limitation ne se retrouve pas dans des langages plus récents comme le C\#.\footnote{En C\#, on peut par exemple récupérer le type d'un objet à l'exécution, parcourir l'ensemble des types chargés en mémoire, sélectionner les types qui héritent de telle classe et qui possèdent un constructeur vide, les instancier, etc.}.
