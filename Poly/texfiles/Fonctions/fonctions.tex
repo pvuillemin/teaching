@@ -76,7 +76,11 @@ Dans le cas particulier o\`u la fonction ne renvoie rien (une
 verrons un exemple un peu plus tard.
 
 \begin{habitudes}[Du bon usage des fonctions]
-Une fonction doit remplir au plus un objectif. Il faut faire des fonctions courtes, dont l'intégralité du code tient de préférence sur un écran. Si vous vous retrouvez face à des monstres de 100 lignes de code, c'est très probablement que vous avez fait une erreur de design.
+Une fonction doit remplir au plus un objectif. Il faut faire des fonctions courtes, dont l'intégralité du code tient de préférence sur un écran. Si vous vous retrouvez face à des monstres de 100 lignes de code ou plus, c'est très probablement que vous avez fait une erreur de design.
+\end{habitudes}
+
+\begin{habitudes}[Les 80 colonnes]
+Une bonne habitude consiste à s'interdire de dépasser la 80ème colonne. Celà permet d'avoir un code lisible même sur des petits écrans sans avoir à scroller horizontalement. Celà permet de pouvoir mettre en vis-à-vis deux fichiers sur des écrans plus larges. Celà permet enfin de se contraindre à écrire du code plus concis, avec des noms de variables plus concis.\\
 \end{habitudes}
 
 \subsection{La fonction \texttt{main}}
@@ -86,7 +90,7 @@ Lorsque vous créez un nouveau projet, nous pouvez choisir de créer une applicati
 Si vous créez une application console, il est nécessaire de préciser le point d'entrée de votre programme, c'est à dire la première fonction à appeler lorsque vous lancerez votre programme. Cette fonction porte par convention le nom de \functionname{main}. Cela a une implication importante, qui est
 qu'\underline{\emph{il ne peut y avoir qu'une seule fonction}} \functionname{main} dans votre programme. Réciproquement, en l'absence de fonction main dans une application console, \textbf{l'édition des liens échouera}.\\
 
-La fonction main accepte plusieurs prototypes : son type de retour est généralement void, mais il peut être entier (on peut utiliser ce type de retour entier pour retourner un code d'erreur si l'exécution du code a déclenché des erreurs). La fonction main peut également prendre des arguments :\\
+La fonction main accepte plusieurs prototypes : son type de retour est généralement void, mais il peut être entier (on peut utiliser ce type de retour entier pour retourner un code d'erreur si l'exécution du code a déclenché des erreurs). La fonction main peut également prendre des arguments, auquel cas ils sont de la forme suivante :\\
 
 \begin{DDbox}{\linewidth}\begin{lstlisting}
 int main(int argc, char* argv[])
@@ -95,7 +99,7 @@ int main(int argc, char* argv[])
 }
 \end{lstlisting}\end{DDbox}
 
-Ces arguments, spécifiés par l'utilisateur au lancement du programme en mode ligne de commande, permettent d'intéragir avec le programme. Par exemple, lorsque sous Linux nous utilisons le programme qui permet de lister tous les fichiers du répertoire courant, nous appelons le programme ls dans l'invite de commande, mais nous pouvons également utiliser ls -l, où la chaîne de caractères -l est passée au programme via la fonction main comme argument.\\
+Ces arguments, spécifiés par l'utilisateur au lancement du programme en mode ligne de commande, permettent d'intéragir avec le programme. Par exemple, lorsque sous Linux nous utilisons le programme qui permet de lister tous les fichiers du répertoire courant, nous appelons le programme ls dans l'invite de commande, mais nous pouvons également utiliser ls -l, où la chaîne de caractères "-l" est passée au programme via la fonction main comme argument.\\
 
 Sauf si vous souhaitez qu'il en soit autrement, nous vous conseillons d'adopter le prototype le plus simple\footnote{attention cependant, ce prototype du main est parfois incompatible avec certaines librairies comme SDL...}:\\
 
@@ -202,7 +206,7 @@ int Square(int x)
 
 Nous retrouvons alors la séparation déclarations dans les fichiers headers et définitions dans les fichiers .cpp comme annoncée dans le chapitre interpréteur/compilateur.\\
 
-Le lecteur déjà initié au C\# ou au Java se demandera naturellement pourquoi il est nécessaire de déclarer les méthodes avant de les définir. C'est principalement pour des raisons historiques; c'est la façon dont on codait en C, et par souci de compatibilité, c'est la manière de faire pour le C++. Il y a d'autres raisons qui peuvent être avancées, notamment l'accélération des temps de compilation, le fait de pouvoir faire référence à du code dont vous n'avez que la déclaration et pas la définition, ... La vraie raison est qu'à l'époque du C, on ne savait pas encore faire autrement, et les techniques de compilation se sont infiniment améliorées depuis cette époque.
+Le lecteur déjà initié au C\# ou au Java se demandera naturellement pourquoi il est nécessaire de déclarer les méthodes avant de les définir. C'est principalement pour des raisons historiques; lorsque le C a été créé, et même lorsque le C++ a été créé, les machines ne possédaient pas assez de RAM pour pouvoir stocker tous les fichiers sources d'un programme en mémoire en même temps. Comme il est possible de compiler chaque fichier source séparément à condition d'avoir pour chaque source les \underline{déclarations} nécessaires, ces langages ont décidé de séparer déclaration et définition. Ainsi en C++, et comme nous l'avons vu dans le chapitre sur la compilation, chaque fichier source est compilé indépendamment des autres. Il y a d'autres raisons qui peuvent être avancées, notamment l'accélération des temps de compilation, le fait de pouvoir faire référence à du code dont vous n'avez que la déclaration et pas la définition (et ainsi de pouvoir vendre des bibliothèques compilées sans dévoiler le code source), etc. Mais la vraie raison est qu'on ne pouvait faire autrement à l'époque.\\
 
 \section{Premier modèle mémoire, Stack et Scope des variables}
 \label{sec:stack}
@@ -213,9 +217,9 @@ Lorsqu'une fonction est appelée, l'environnement lui construit un espace mémoire
 
 Lorsqu'une fonction g appelée par une fonction f est terminée, l'environnement revient à la fonction f et restaure son état de telle sorte que les instructions de f qui faisaient suite à l'appel de g peuvent être exécutées.\\
 
-Pour stocker toutes les données nécessaires à la bonne exécution d'une application, l'environnement fait donc appel à une structure de données spécialisée appelée : la \textit{Stack}. Cette structure s'organise comme une pile d'assiettes sur laquelle les assiettes peuvent être empilées et dépilées selon l'ordre : la dernière arrivée est la première sortie (\textit{"Last In First Out, ou LIFO"}).\\ 
+Pour stocker toutes les données nécessaires à la bonne exécution d'une application, l'environnement fait donc appel à une structure de données spécialisée appelée : la \textit{Stack}. Cette structure s'organise comme une pile d'assiettes sur laquelle les assiettes peuvent être empilées et dépilées selon l'ordre : la dernière arrivée est la première sortie (\textit{"Last In First Out, ou LIFO"}).\\
 
-A chaque fois qu'une fonction est appelée, une assiette (Stack Frame) est ajoutée sur la stack, contenant toutes les informations et la mémoire nécessaire à la bonne exécution de la fonction. Dès que cette fonction est terminée, toutes ses variables deviennent inutiles, sa Stack Frame est alors ôtée du haut de la stack, et l'exécution revient à la ligne de code suivante de la fonction appelante. La Stack Frame tout en haut de la stack est donc celle correspondant à la fonction actuellement exécutée.\\
+A chaque fois qu'une fonction est appelée, une assiette (Stack Frame) est ajoutée sur la Stack, contenant toutes les informations et la mémoire nécessaire à la bonne exécution de la fonction. Dès que cette fonction est terminée, toutes ses variables deviennent inutiles, sa Stack Frame est alors ôtée du haut de la Stack, et l'exécution revient à la ligne de code suivante de la fonction appelante. La Stack Frame tout en haut de la Stack est donc celle correspondant à la fonction actuellement exécutée.\\
 
 Considérons l'exemple suivant :\\
 
@@ -225,7 +229,7 @@ double SquareError(double x, double y)
     double s = x-y;
     double result = s*s;
     return result;
-    
+
 }
 
 void main()
@@ -309,7 +313,7 @@ void main()
 
 Dans cet exemple, les valeurs \varname{a,b,c,d,e} ont pour scope la fonction main. Une variable \varname{s} est déclarée dans \functionname{SquareError}, et elle est détruite à la fin de la fonction. L'identifiant \varname{s} est "recyclé" dans la fonction ManhattanError, et la variable \varname{s} est également détruite à la fin de cette fonction. Le double usage de l'identifiant \varname{s} ne pose pas de problème au compilateur, qui comprend que la variable est "muette" dans les deux cas.\\
 
-A l'entrée de la fonction main, l'état de la Stack est représenté dans le graphique \ref{fig:stack4}. Lorsque la fonction \functionname{SquareError} est appelée, la Stack se trouve dans l'état représenté par le graphique \ref{fig:stack5}. Lorsque la fonction \functionname{SquareError} est achevée, l'état de la Stack revient à celui du graphique \ref{fig:stack4}. Ensuite, la fonction \functionname{ManhattanError} est appelée, et la Stack passe alors dans l'état représenté dans le graphique \ref{fig:stack6}. Enfin, juste avant la fin de la fonction \functionname{ManhattanError}, et avant de retourner dans le mail, il est fait appel à la fonction \functionname{abs} qui vient ajouter alors une Stack Frame dans la Stack\footnote{Pour être tout à fait exact, le compilateur est capable, dans de nombreux cas comme celui-ci, de déterminer qu'il n'est pas nécessaire de garder trace de la Stack Frame de \functionname{ManhattanError} lorsque nous sommes dans la fonction \functionname{abs}, et qu'il peut optimiser les appels pour ne garder que les Stacks Frames de \functionname{abs} et \functionname{main} : c'est le principe du "Tail Call Optimization".}, comme il est présenté dans le graphe \ref{fig:stack7}.\\
+A l'entrée de la fonction main, l'état de la Stack est représenté dans le graphique \ref{fig:stack4}. Lorsque la fonction \functionname{SquareError} est appelée, la Stack se trouve dans l'état représenté par le graphique \ref{fig:stack5}. Lorsque la fonction \functionname{SquareError} est achevée, l'état de la Stack revient à celui du graphique \ref{fig:stack4}. Ensuite, la fonction \functionname{ManhattanError} est appelée, et la Stack passe alors dans l'état représenté dans le graphique \ref{fig:stack6}. Enfin, juste avant la fin de la fonction \functionname{ManhattanError}, et avant de retourner dans le \functionname{main}, il est fait appel à la fonction \functionname{abs} qui vient ajouter alors une Stack Frame dans la Stack\footnote{Pour être tout à fait exact, le compilateur est capable, dans de nombreux cas comme celui-ci, de déterminer qu'il n'est pas nécessaire de garder trace de la Stack Frame de \functionname{ManhattanError} lorsque nous sommes dans la fonction \functionname{abs}, et qu'il peut optimiser les appels pour ne garder que les Stacks Frames de \functionname{abs} et \functionname{main} : c'est le principe du "Tail Call Optimization".}, comme il est présenté dans le graphe \ref{fig:stack7}.\\
 
 Notez que pour utiliser la fonction valeur absolue, fonction standard du langage, nous devons utiliser la librairie "math", dont les méthodes sont déclarées dans le fichier header \varname{math.h} qui est stocké dans le répertoire de Visual Studio. Pour utiliser cette librairie, nous utilisons donc un include, mais substituons les symboles < et > en lieu et place des guillemets "" pour spécifier au compilateur que ce fichier \varname{math.h} appartient à la bibliothèque standard et n'est pas un fichier de votre propre cru.\\
 
@@ -317,7 +321,7 @@ Notez que pour utiliser la fonction valeur absolue, fonction standard du langage
 	\begin{center}
 		\includegraphics[scale=0.5]{../../Pictures/stack4}
 	\end{center}
-	\caption{Etat de la stack à l'entrée du main}
+	\caption{Etat de la Stack à l'entrée du main}
 	\label{fig:stack4}
 \end{figure}
 
@@ -325,7 +329,7 @@ Notez que pour utiliser la fonction valeur absolue, fonction standard du langage
 	\begin{center}
 		\includegraphics[scale=0.5]{../../Pictures/stack5}
 	\end{center}
-	\caption{Etat de la stack à l'entrée dans SquareError}
+	\caption{Etat de la Stack à l'entrée dans SquareError}
 	\label{fig:stack5}
 \end{figure}
 
@@ -333,7 +337,7 @@ Notez que pour utiliser la fonction valeur absolue, fonction standard du langage
 	\begin{center}
 		\includegraphics[scale=0.5]{../../Pictures/stack6}
 	\end{center}
-	\caption{Etat de la stack à l'entrée dans ManhattanError}
+	\caption{Etat de la Stack à l'entrée dans ManhattanError}
 	\label{fig:stack6}
 \end{figure}
 
@@ -341,7 +345,7 @@ Notez que pour utiliser la fonction valeur absolue, fonction standard du langage
 	\begin{center}
 		\includegraphics[scale=0.5]{../../Pictures/stack7}
 	\end{center}
-	\caption{Etat de la stack à l'entrée dans abs}
+	\caption{Etat de la Stack à l'entrée dans abs}
 	\label{fig:stack7}
 \end{figure}
 
@@ -352,7 +356,7 @@ Considérons une méthode Increment qui prenne un entier et l'incrémente. Nous vou
 
 \subsection{Passage d'argument par valeur}
 
-Une première idée serait d'implémententer la fonction Increment comme suit :\\
+Pour une variable \classname{int} \varname{a}, les instructions \varname{a=a+1;} et \varname{a++} sont équivalentes. Une première idée serait donc d'implémententer la fonction Increment comme suit :\\
 
 \begin{DDbox}{\linewidth}\begin{lstlisting}
 void Increment1(unsigned int a)
@@ -368,7 +372,7 @@ void main()
 }
 \end{lstlisting}\end{DDbox}
 
-Si nous ex\'ecutons ce dernier code \footnote{Il est fortement recommand\'e
+Si nous ex\'ecutons ce code \footnote{Il est fortement recommand\'e
 de le faire pour vous en persuader.}, nous constatons que lorsque nous appelons cette fonction dans notre main, nous n'obtenons pas les résultats attendus, la variable b prenant la valeur 2. La
 raison \`a cela est que c'est une \emph{copie} de \texttt{i} qui est pass\'ee
 \`a la fonction (copie désignée par le symbole a), et non la variable i "elle-m\^eme" : le compilateur C++ va par défaut réaliser des copies des arguments que nous donnons à une fonction. Dans l'exemple précédent, une variable i est créée dans la fonction main. Lorsque nous appelons la fonction Increment1, une variable a est créée et le compilateur lui affecte la valeur de i. Cette valeur a est incrémentée dans la fonction Increment1, puis est détruite à la fin de la fonction. Lorsque nous retournons dans la fonction main après exécution de la fonction Increment1, nous avons donc incrémenté une variable a, que nous avons détruite à la fin de la fonction Increment1 et nous disposons maintenant de la variable i dont la valeur n'a jamais été modifiée. \\
@@ -421,7 +425,7 @@ Valeur &  &  & 0100... & 000... & 00...  & 000.. &  &  &  &  &  \\
 \end{tabular}
 \end{center}
 
-Il nous faut également spécifier en C++ au compilateur que nous ne voulons pas qu'il travaille avec une copie de la variable i, mais bien avec la variable i elle-même.
+Il nous faut donc spécifier en C++ au compilateur que nous ne voulons pas qu'il travaille avec une copie de la variable i, mais bien avec la variable i elle-même.
 
 \subsection{Passage d'argument par pointeur}
 
@@ -445,6 +449,7 @@ void main()
 Cette fois-ci, nous avons donné en argument non pas la variable i, mais un pointeur vers cette variable i via la variable pointeur pi. Le compilateur va créer une copie de la variable pi, p, qui prendra la même valeur que pi, c'est à dire qui pointera sur i également. Lorsque nous exécutons le code de la fonction Increment2, nous accédons donc bien à l'adresse mémoire de la variable i, qui est effectivement modifiée.
 
 \subsection{Passage d'argument par référence}
+
 Le C++ (à la différence du C), propose un sucre syntaxique pour abstraire la manipulation de pointeur : c'est le passage par référence. Plus pr\'ecis\'ement, il existe un \'equivalent du \texttt{ByRef} de Visual
  Basic, qui est le signe \&. Lorsque nous passons une valeur par référence, nous adoptons la syntaxe du passage par valeur (au symbole \& prêt) mais le compilateur va interpréter ceci comme un passage par pointeur. En voici un exemple :\\
 
@@ -461,7 +466,7 @@ void main()
 }
 \end{lstlisting}\end{DDbox}
 
-Nous obtenons bien une valeur de 3 pour la variable b à la fin du main.\\
+Nous obtenons bien une valeur de 3 pour la variable \varname{b} à la fin du main.\\
 
 \begin{warning}
 Il est important de noter que
@@ -473,7 +478,7 @@ Il est important de noter que
 Il y a deux raisons pour lesquelles nous pouvons souhaiter passer un argument par référence :
 \begin{itemize}
 \item La première, comme nous venons de le voir, pour modifier réellement la valeur de l'argument en dehors de la fonction appelée.
-\item La deuxième, pour éviter une copie (copie qui aurait des conséquences en termes de coût et de sens).
+\item La deuxième, pour éviter une copie (copie qui aurait des conséquences en termes de coût et de sens).\\
 \end{itemize}
 
 Dans le deuxième cas, puisque c'est vraiment l'objet et non pas une copie de lui-même qui est passé à la fonction, la fonction pourrait donc modifier par inadvertance l'objet donné en argument. Nous souhaiterions parfois pouvoir interdire la modification de l'objet manipulé, par mesure de sécurité, lorsque celui-ci est donné en argument par référence. Le C++ permet de faire ceci en précisant au niveau de l'argument de la fonction que celui-ci est constant (immutable) et qu'il ne devra pas être modifié :\\
@@ -493,6 +498,6 @@ Le fait qu'une fonction agisse non pas par sa valeur de retour mais par le fait 
 
 \begin{habitudes}[Méthodes à effet de bord]
 
-Lorsqu'une méthode a des effets de bord, il est de bon goût que cette méthode n'ait pas de type de retour. Ainsi, il est beaucoup plus aisé au relecteur du code de deviner que la méthode va agir par effet de bord. Inversement, une méthode qui a un type de retour n'est pas sensée avoir des effets de bord sur ses arguments.
+Lorsqu'une méthode agit par effet de bord, il est de bon goût que cette méthode n'ait pas de type de retour. Ainsi, il est beaucoup plus aisé au relecteur du code de deviner que la méthode va agir par effet de bord. Inversement, une méthode qui a un type de retour n'est pas sensée avoir des effets de bord sur ses arguments.
 
 \end{habitudes}
