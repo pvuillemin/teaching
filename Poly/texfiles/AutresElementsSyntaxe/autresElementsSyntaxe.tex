@@ -15,6 +15,8 @@ sa page personnelle \end{savequote}
 \subsection{Tests}
 \subsubsection{Tests simples}
 
+Un test est un ensemble d'instructions qui ne doivent être exécutées que conditionnellement au fait qu'une certaine condition soit ou non vérifiée.\\
+
 Comme dans les autres langages, nous voulons pouvoir faire des tests
 sur les valeurs des variables. La syntaxe d'un test ainsi qu'un exemple peuvent \^etre lus ci-dessous:\\
 
@@ -86,7 +88,7 @@ Afin d'\'eviter l'erreur classique du listing \ref{erreuraffectation}, une bonne
 \begin{lstlisting}
 if (0 == x)
 {
-	x =  x + 1
+	x =  x + 1;
 }
 \end{lstlisting}
 \end{DDbox}
@@ -96,7 +98,7 @@ En lieu et place de :\\
 \begin{DDbox}{\linewidth}\begin{lstlisting}
 if (x == 0)
 {
-	x =  x + 1
+	x =  x + 1;
 }
 \end{lstlisting}
 \end{DDbox}
@@ -106,7 +108,7 @@ if (x == 0)
 Enfin, nous remarquons \`a nouveau l'emploi des accolades pour signifier le
 d\'ebut et la fin d'un bloc logique (comme en Java). Les habitu\'es de
 Python noteront que l'indentation est libre - contrairement \`a Python -, ce
-qui justifie l'emploi des accolades\footnote{Une petite pr\'ecision est \`a apporter : dans le cas o\`u le code conditionnel à ex\'ecuter fait une seule ligne, on peut se passer des accolades.  Cependant, cette pratique est dangereuse (on rajoute une ligne apr\`es et l'on oublie de rajouter les accolades) et donc \`a \'eviter au moins dans un premier temps.}.
+qui justifie l'emploi des accolades\footnote{Une petite pr\'ecision est à apporter : dans le cas o\`u le code conditionnel à ex\'ecuter fait une seule ligne, on peut se passer des accolades.  Cependant, cette pratique est dangereuse (on rajoute une ligne apr\`es et l'on oublie de rajouter les accolades) et donc \`a \'eviter au moins dans un premier temps.}.
 
 \begin{habitudes}[Indentation]
 Il est \emph{tr\`es} important d'indenter son code correctement, faute de quoi il devient rapidement illisible.
@@ -183,7 +185,7 @@ Le code du listing \ref{lst:testserielaid.cpp} devient donc :\\
 \includecodecaption{testserieswitch.cpp}{Tests en s\'erie}
 
 
-Le code obtenu pr\'esente l'avantage d'\^etre beaucoup plus clair et \'el\'egant qu'avant.
+Le code obtenu pr\'esente l'avantage d'\^etre plus clair et \'el\'egant qu'avant.
 
 \subsection{Boucles}
 

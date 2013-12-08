@@ -16,15 +16,15 @@ La complexité d'un code n'est pas linéaire avec sa taille : plus un projet est v
 (au delà de quelques centaines de lignes de code) nécessaire d'architecturer le code pour en faciliter la lecture,
 et donc la maintenance et le debuggage. Cette problématique est devenue centrale. En effet, depuis 30 ans la taille des projets a explosé : pour maintenir un projet, il faut donc penser son architecture pour l'organiser comme une synergie d'objets indépendants incarnant chacun un rôle/une fonctionnalité.\\
 
-L'idée fondamentale, c'est d'avoir des entités logiques riches, le plus distinctes, réduites et découplées possible. Dans ce chapitre, nous introduisons ces entités logiques riches, appelées classes. En règle générale, une classe regroupe un ensemble de données et de méthodes. L'architecture générale d'une classe est de ne rendre disponible qu'une petite partie de ses fonctions (appelées méthodes) et données, celles réellement utiles de l'extérieur, et de cacher pour l'extérieur la majorité de son implémentation. Cette conception permet de découpler les différentes complexités d'un programme et de simplifier la lecture du code : pour comprendre comment utiliser une classe, il suffit de comprendre ce que font les méthodes "publiques" et non pas de comprendre tous les mécanismes sous-jacents.\\
+L'idée fondamentale, c'est d'avoir des entités logiques riches, le plus distinctes, réduites et découplées possible. Dans ce chapitre, nous introduisons ces entités logiques riches, appelées classes. En règle générale, une classe regroupe un ensemble de données et de fonctions. L'architecture générale d'une classe est de ne rendre disponible qu'une petite partie de ses fonctions (appelées méthodes) et données, celles réellement utiles de l'extérieur, et de cacher pour l'extérieur la majorité de son implémentation. Cette conception permet de découpler les différentes complexités d'un programme et de simplifier la lecture du code : pour comprendre comment utiliser une classe, il suffit de comprendre ce que font les méthodes "publiques" et non pas de comprendre tous les mécanismes sous-jacents.\\
 
-La notion de classe est si centrale qu'on désigne souvent les langages qui permettent ce genre d'entités comme des langages "orientés objet". Jusqu'à présent, nous avions présenté nos programmes sous une forme procédurale, c'est à dire qu'une méthode main appelait d'autres fonctions qui à leur tour en appelaient des autres, ... A présent, nous créerons des objets, instances de types plus complexes, où chaque type représentera un ensemble de méthodes et de données formant une unité logique.\\
+La notion de classe est si centrale qu'on désigne souvent les langages qui permettent ce genre d'entités comme des langages "orientés objet". Jusqu'à présent, nous avions présenté nos programmes sous une forme procédurale, c'est à dire qu'une méthode main appelait d'autres fonctions qui à leur tour en appelaient des autres, ... A présent, nous créerons des objets, instances de types plus complexes, où chaque type représentera un ensemble de méthodes et de données formant une unité logique. Les actions et intéractions de ces objets définissent le nouveau flux d'exécution.\\
 
-A titre illustratif, nous utiliserons dans tout ce chapitre l'exemple d'une classe accumulator dont la fonction sera de calculer la moyenne et la variance empirique de valeurs réelles.
+A titre illustratif, nous utiliserons dans tout ce chapitre l'exemple d'une classe \classname{Accumulator} dont la fonction sera de calculer la moyenne et la variance empirique de valeurs réelles.
 
 \section{Déclaration des classes}
 
-Commençons par déclarer une classe Accumulator. Cette classe contiendra plusieurs variables, appelées des \textit{champs}. Voici la déclaration de cette classe dans le fichier Accumulator.h correspondant :\\
+Commençons par déclarer cette classe \classname{Accumulator}. Cette classe contiendra plusieurs variables, appelées des \textit{champs}. Voici la déclaration de cette classe dans le fichier Accumulator.h correspondant :\\
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}
@@ -46,10 +46,10 @@ public:
 \end{lstlisting}
 \end{DDbox}
 
-Les champs n, xSum et xSquareSum sont intrinsèques à la classe. Chaque instance, c'est à dire chaque exemplaire de la classe Accumulator possèdera ces attributs.\\
+Les champs \varname{n}, \varname{xSum} et \varname{xSquareSum} sont intrinsèques à la classe. Chaque instance, c'est à dire chaque exemplaire de la classe \classname{Accumulator} possèdera ces attributs.\\
 
 Une fois notre classe déclarée, nous pouvons alors déclarer des instances de ce type;
-Nous déclarons/définissons donc un accumulator dans notre main de la manière suivante :\\
+Nous déclarons/définissons donc un \classname{Accumulator} dans notre main de la manière suivante :\\
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}
@@ -64,7 +64,7 @@ void main()
 \end{lstlisting}
 \end{DDbox}
 
-Nous pouvons écrire des méthodes reliées à la classe Accumulator. Pour celà, nous ajoutons dans la déclaration de
+Nous pouvons écrire des méthodes reliées à la classe \classname{Accumulator}. Pour celà, nous ajoutons dans la déclaration de
 notre classe les prototypes des méthodes que nous souhaitons ajouter :\\
 
 \begin{DDbox}{\linewidth}
@@ -87,7 +87,7 @@ class Accumulator
 \end{lstlisting}
 \end{DDbox}
 
-Pour définir la méthode correspondante, nous procédons comme précédemment, mais précédons le nom de la méthode du nom de la classe suivi de "::", afin de signifier au compilateur que la méthode est attachée à cette classe (nous parlons alors de \textit{fonction membre}).\\
+Pour définir la méthode correspondante, nous procédons comme précédemment, mais précédons le nom de la méthode du nom de la classe suivi de "::", afin de signifier au compilateur que la fonction est attachée à cette classe (nous parlons alors de \textit{fonction membre} ou \textit{méthode}).\\
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}
@@ -981,7 +981,7 @@ class A
     public:
         A(int c, int d);
         ~A();
-        
+
     private:
         int _c;
         int _d;

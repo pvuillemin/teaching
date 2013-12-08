@@ -338,6 +338,139 @@ next i
 
 Pour créer un tableau dont la taille n'est pas une constante écrite nommément dans le code, c'est beaucoup plus difficile; nous reviendrons sur ce point dans le chapitre \ref{chapter:memory}.\\
 
+\section{Opérations de conversion / casting}
+
+L'opération de convertir une variable d'un certain type en une variable d'un autre type s'appelle conversion de type, ou \textit{type casting}. Nous utiliserons indifféremment les deux dénominations.\\
+
+\subsection{Conversions implicites}
+
+Les conversions implicites, comme leur nom l'indique, ne requiert aucune opération de votre part et sont réalisées automatiquement par l'environnement. Ainsi le code suivant est correct : \\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[language=C++,label="conversionImplicite", caption="Conversion implicite"]
+float pi = 3.14;
+double pii = pi;
+\end{lstlisting}
+\end{DDbox}
+
+Il existe de nombreuses conversions implicites pour les types primitifs, comme les conversions suivantes : short => int, int => float, float=>double, double => int, etc.\\
+
+\warning Il existe aussi des conversions implicites qui sont beaucoup moins évidentes. Ainsi, si le type \classname{B} possède un constructeur qui prenne en argument une instance de type \classname{A}, le cast implicite suivant est légal :\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[language=C++,label="conversionImplicite2", caption="Conversion implicite par le constructeur"]
+class A {};
+class B { public: B (A a) {} };
+
+A a;
+B b=a;
+\end{lstlisting}
+\end{DDbox}
+
+C'est clairement une fonctionnalité WhatTheFuck du langage, mais elle reste assez agréable pour la déclaration de SmartPointer, cf chapitre \ref{chap:memory1}.\\
+
+\subsection{Conversions explicites}
+
+Pour de nombreuses autres conversions, il est nécéssaire d'expliciter l'opération de conversion. Cette explicitation se réalise en mettant à gauche de la variable que l'on souhaite convertir (caster) le type vers lequel nous souhaitons convertir, encadré par des parenthèses. Ainsi, la conversion suivante est-elle réalisée explicitement : \\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[language=C++,label="conversionExplicite", caption="Conversion explicite d'un short en int"]
+short s = 200;
+int b = (int) s;
+\end{lstlisting}
+\end{DDbox}
+
+Deux fonctions ou deux opérateurs peuvent avoir le même nom, mais posséder des arguments de type différents, et avoir ou non le même comportement. Ainsi, l'opérateur "/" (lire "divisé par") est-il défini différemment pour des entiers et pour des réels. Dans le cas où \varname{a} et \varname{b} sont des entiers, le résultat de \varname{a/b} est le quotient dans la division euclidienne de \varname{a} par \varname{b}. Ainsi, si \varname{a} vaut 16 et \varname{b} vaut 17, le résultat de \varname{a/b} vaut 0. Cependant, si \varname{c} et \varname{d} sont deux réels, alors le sens de \varname{c/d} correspond au quotient réel, qui vaut une valeur proche de 1, même si \varname{c} et \varname{d} ont pour valeur un entier.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[language=C++,label="division", caption="Divisions réelles et euclidiennes"]
+int a = 16;
+int b = 17;
+int q1 = a/b; //q1 = 0
+
+double c = 16;
+double d = 17;
+double q2 = c/d // q2 = 0.94117647058
+\end{lstlisting}
+\end{DDbox}
+
+Ainsi, lorsque nous voudrons estimer un quotient de deux entiers, il faudra bien prendre garde que sauf mention du contraire, le quotient calculé sera celui de la division euclidienne. Si nous voulons obtenir le quotient réel, il nous faut caster au moins un des deux arguments en réel, comme dans le listing suivant, afin de faire comprendre au compilateur que nous ne voulons pas du quotient euclidien.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[language=C++,label="division2", caption="Cast d'un entier en double pour obtenir une division réelle"]
+int a = 16;
+int b = 17;
+double q1 =((double) a)/b; //q = 0.94117647058
+\end{lstlisting}
+\end{DDbox}
+
+\subsection{Indécisions sur les cast}
+
+De manière semblable, définissons une fonction Power, qui prenne en argument deux réels \varname{x} et \varname{y} pour calculer $x^y$.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[language=C++,label="power1", caption="Une première fonction Power"]
+#include <math.h>
+double Power(double x, double y)
+{
+    return exp(y*log(x));
+}
+\end{lstlisting}
+\end{DDbox}
+
+Nous pouvons donner en argument à cette fonction un entier, l'environnement se chargeant de réaliser le cast implicitement.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[language=C++,label="power1bis", caption="Un autre cast implicite"]
+
+void main()
+{
+    int a = 3;
+    int b = 2;
+    double c = Power(a,b);
+}
+
+\end{lstlisting}
+\end{DDbox}
+
+Définissons ensuite la même fonction Power dont les arguments sont cette fois-ci des \classname{float}.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[language=C++,label="power2", caption="Une deuxième fonction Power"]
+#include <math.h>
+float Power(float x, float y)
+{
+    return exp(y*log(x));
+}
+\end{lstlisting}
+\end{DDbox}
+
+Nous ne pouvons plus maintenant réaliser de conversion implicite, car l'environnement ne sait s'il doit caster nos entiers en \classname{double} et utiliser la première fonction, ou bien caster nos entiers en \classname{float} et utiliser la deuxième fonction. Ainsi à la compilation, nous obtenons un message d'erreur semblable au suivant : \\
+
+\begin{DDbox}{\linewidth}
+more than one instance of overloaded function "Power" matches the argument list:
+    function "Power(double x, double y)"
+    function "Power(float x, float y)"
+argument types are: (int, int)
+\end{DDbox}
+
+Il nous faut donc ici réaliser un cast explicite pour lever l'ambiguïté.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[language=C++,label="power2bis", caption="Le cast explicite est ici indispensable"]
+
+void main()
+{
+    int a = 3;
+    int b = 2;
+    double c = Power( (double) a, (double) b);
+}
+
+\end{lstlisting}
+\end{DDbox}
+
+Bien que le C++ soit statiquement typé (cf paragraphe suivant) et que celà garantisse que de nombreuses erreurs de typage aient lieu à la compilation plutôt qu'à l'exécution (ce qui réduit très fortement leur potentiel de nuisance), il est possible de tromper le compilateur via toutes sortes d'horreurs résultant de casts explicites, et ainsi de passer les vérifications à la compilation et d'échouer seulement à l'exécution. Pour se prémunir au moins partiellement de ces problèmes, il existe différents opérateurs de cast supplémentaires (\functionname{dynamic\_cast<T>, static\_cast<T>, reinterpret\_cast<T>} et \functionname{const\_cast<T>}), mais ceci dépasse le cadre de notre cours.\\
+
 \section{Le typage du C++}
 
 Le C++ est un langage typ\'e de mani\`ere statique. Cela signifie que les variables doivent \^etre d\'eclar\'ees et leur types explicit\'es, à la différence par exemple du python où une même variable peut contenir successivement un entier puis une chaîne de caractère ou un double. Le compromis qui se cache derrière ce choix est un compromis souplesse / performance et garantie. Devoir déterminer à l'exécution le type d'une variable plutôt que de l'avoir déterminé statiquement a un certain coût. Les types n'existent en C++ qu'à la compilation, c'est à dire qu'à l'execution il n'est plus possible de récupérer le type d'un objet; cette limitation ne se retrouve pas dans des langages plus récents comme le C\#.\footnote{En C\#, on peut par exemple récupérer le type d'un objet à l'exécution, parcourir l'ensemble des types chargés en mémoire, sélectionner les types qui héritent de telle classe et qui possèdent un constructeur vide, les instancier, etc.}.
