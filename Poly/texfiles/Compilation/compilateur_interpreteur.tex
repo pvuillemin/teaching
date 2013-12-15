@@ -351,6 +351,154 @@ Le fait d'utiliser les \#ifndef \#endif nous permet d'éviter d'inclure deux fois
 
 Une fois le preprocessing achevé, le compilateur convertit chaque fichier .cpp en un fichier binaire .o ou .obj (selon le compilateur). Lorsque les fichiers main.obj, A.obj et B.obj sont créés, l'éditeur des liens permet de matcher les fonctions, c'est à dire que l'éditeur des liens parcourt les fichiers .obj pour trouver la fonction functionInB() appelée dans la fonction functionInA(). Cette fonction est trouvée dans B.obj, et l'éditeur de lien indique que lorsque functionInA() appellera functionInB(), il faudra exécuter le code présent dans B.obj. L'éditeur de lien fait de même pour les fonctions functionInA() et functionInB() utilisées dans main.obj. Lorsque tous les appels à des méthodes extérieures sont résolus, l'éditeur de lien réassemble tous les fichiers .obj en un fichier exécutable (.exe) ou en une librairie (.dll).
 
+\section{Librairies standard}
+
+\subsection{... du C++ standard}
+
+De nombreuses librairies open-source sont disponibles pour le C++, mais les librairies "de base" sont assez limitées par rapport à d'autres langages plus récents qui en contiennent plus. Par exemple, il n'existe pas de librairie native pour parser du XML, pour faire une requête HTTP, pour accéder à une base de données SQL, pour faire du threading ou écrire des Regex\footnote{Le C++11, non traité dans ce cours, fournit maintenant certaines de ces fonctionnalités dans les librairies standard.}. Toutes ces librairies existent bien sûr, mais elles ne sont pas intégrées au langage et doivent être installées et configurées pour être accessibles depuis votre IDE.\\
+
+Dans les sous-sections qui suivent, nous brossons un tableau très sommaire de quelques librairies standard que vous serez probablement amenés à utiliser, et qu'il vous sera possible d'utiliser juste en faisant mention du \#include correspondant, sans rien installer sur votre machine.\\
+
+Pour utiliser une librairie standard simplement, en plus d'ajouter l'instruction \functionname{\#include} correspondante, il faut ajouter en dessous la ligne "using namespace std;" pour spécifier à l'environnement qu'il doit également chercher la déclaration des classes et fonctions dans "l'espace de nommage standard". Nous ne détaillons pas plus avant la théorie de cette nécessité, mais les extraits de code qui suivent éclaireront par l'exemple.\\
+
+\subsubsection{<iostream>}
+
+La librairie \classname{<iostream>} est la bibliothèque standard pour afficher un message dans la console ou récupérer un ensemble de lettres insérées par un utilisateur. L'opérateur pour afficher un message à l'écran est l'opérateur \functionname{cout}. Cet opérateur s'accompagne de l'opérateur \functionname{<<} qui indique quel est le message à afficher à l'écran.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+#include <iostream>
+using namespace std;
+
+void main()
+{
+    cout << "Hello World";
+}
+\end{lstlisting}
+\end{DDbox}
+
+Vous pouvez également afficher dans la console la valeur de variables de types primitifs. Ainsi, l'instruction suivante affiche-t-elle 2 à l'écran : \\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+#include <iostream>
+using namespace std;
+
+void main()
+{
+    int a = 2;
+    cout << a;
+}
+\end{lstlisting}
+\end{DDbox}
+
+Pour aller à la ligne, vous pourrez utiliser le caractère du retour-charriot : "$\setminus n$". Enfin, vous pouvez enchaîner plusieurs messages à afficher en les séparant par l'opérateur \functionname{<<}. Ainsi, les instructions suivantes affichent-elles "The value of a is 2" et le prochain message sera affiché à la ligne suivante;\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+#include <iostream>
+using namespace std;
+
+void main()
+{
+    int a = 2;
+    cout << "The value of a is" << a << "\n";
+}
+\end{lstlisting}
+\end{DDbox}
+
+Dans la pratique, en dehors des tous premiers programmes que vous implémenterez en TD, nous aurons tendance à peu nous servir des opérateurs \functionname{cin} et \functionname{cout}.\\
+
+\subsubsection{<vector>}
+
+La librairie \functionname{<vector>} permet d'utiliser la classe \classname{vector} qui représente les tableaux dynamiques, c'est à dire les tableaux dont la taille n'est pas connue à la compilation. La motivation et l'implémentation de cette classe sont esquissées dans le chapitre \ref{chap:memory1}. Le snippet de code suivant en donne un exemple d'utilisation.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+#include <vector>
+using namespace std;
+
+void main()
+{
+    int n = 10*10;
+    vector v(n);
+    for (int i = 0 ; i < n ; i++)
+    {
+        v[i] = i*2;
+    }
+}
+\end{lstlisting}
+\end{DDbox}
+
+\subsubsection{<string>}
+
+La librairie \functionname{<string>} permet de manipuler des chaînes de caractère de manière plus simple que par les tableaux de caractères du C (\classname{char[]}). En voici un exemple : \\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+#include <string>
+using namespace std;
+
+void main()
+{
+    string myMessage = "Hello World";
+}
+\end{lstlisting}
+\end{DDbox}
+
+\subsubsection{<math.h>}
+
+La librairie \functionname{<math.h>} contient de multiples fonctions "mathématiques" comme l'exponentielle, le logarithme, les fonctions min et max, les fonctions d'arrondi, les fonctions puissances et racine carrée, les fonctions trigonométriques, etc.
+
+\subsubsection{<fstream>}
+
+La librairie \functionname{<fstream>} permet d'intéagir en lecture et en écriture avec des fichiers stockés sur le disque. Cette librairie reprend l'usange des opérateurs de flux \functionname{<<} et \functionname{>>} de \varname{<iostream>}. L'exemple suivant crée un fichier "SomeExample.txt" et y écrit une ligne de texte.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}
+#include <fstream>
+using namespace std;
+
+int main () {
+  ofstream myfile;
+  myfile.open ("SomeExample.txt");
+  myfile << "Writing something to this file.\n";
+  myfile.close();
+  return 0;
+}
+\end{lstlisting}
+\end{DDbox}
+
+\subsubsection{<exception>}
+
+La librairie \functionname{<exception>} contient un ensemble de fonctions relatives à la gestion des exceptions en C++. Parmi elles, des exceptions handlers et des méthodes pour relancer les exceptions.\\
+
+\subsubsection{<random>}
+
+La librairie \functionname{<random>} fournit différents générateurs de nombres aléatoires ainsi que la simulation de nombreuses loi différentes.\\
+
+\subsection{... du C++11}
+
+Certaines bibliothèques ont été ajoutées au standard dans la nouvelle version du C++, le C++11. Cependant, le C++11 apporte suffisamment de changements et de complexité pour que nous renonçions à le traiter dans ce cours. A titre de culture générale, nous listons ci-dessous quelques-unes des librairies standards les plus utiles qui ont été ajoutées en C++11.\\
+
+
+
+\subsubsection{<memory>}
+
+La libraire \classname{memory} contient les \classname{shared\_ptr<T>} depuis le C++11 (ils se trouvaient dans les versions antérieures du C++ dans la librairie Boost). L'utilisation et l'implémentation des \classname{shared\_ptr<T>} est discutée dans le chapitre \ref{chap:memory1}.
+
+\subsubsection{Les librairies de threading}
+
+Le C++11 introduit enfin un cadre avec un modèle mémoire\footnote{un modèle mémoire est une définition du type de mémoire relative à un thread que peuvent observer les autres threads.} correct pour le C++, permettant ainsi de faire de manière raisonnable du multi-threading et de la programmation concurrente. Les librairies \functionname{<thread>}, \functionname{<mutex>}, \functionname{<condition\_variable>}, \functionname{<future>} participent à l'élaboration de ce cadre.\\
+
+\subsubsection{<unordered\_map>}
+
+Les \functionname{unordered\_map} sont des dictionnaires ressemblant au \functionname{map} déjà existantes dans le standard, mais dont l'accès à un élément donné est plus rapide.\\
+
+\subsubsection{<tuple>}
+
+Les \classname{tuple} sont des containers génériques pratiques pour contenir un nombre faible d'éléments de types différents.\\
+
 \section{Survivre à des messages d'erreurs incompréhensibles}
 
 \subsection{Erreurs à la génération du projet}
