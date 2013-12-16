@@ -421,7 +421,7 @@ Accumulator::~Accumulator(void)
 }
 \end{lstlisting}\end{DDbox}
 
-Nous attirons votre attention sur le fait suivant : à la différence du constructeur qui va être appelé explicitement par le développeur lorsque celui souhaite créer un objet, le destructeur est en général appelé par l'environnement sans qu'aucune instruction ne soit nécessaire. En effet, lorsqu'un objet est créé dans une fonction \functionname{f}, le scope de l'objet créé est celui de \functionname{f}, et donc l'objet doit être détruit lorsque nous achevons la fonction \functionname{f}. Après la fin de la fonction \functionname{f}, c'est l'environnement qui va automatiquement détruire toutes les variables locales à \functionname{f} en détruisant la StackFrame correspondante. Pour les objets à détruire qui ne sont pas de type primitif, c'est l'environnement qui appelle automatiquement les destructeurs des types correspondants.\\ 
+Nous attirons votre attention sur le fait suivant : à la différence du constructeur qui va être appelé explicitement par le développeur lorsque celui souhaite créer un objet, le destructeur est en général appelé par l'environnement sans qu'aucune instruction ne soit nécessaire. En effet, lorsqu'un objet est créé dans une fonction \functionname{f}, le scope de l'objet créé est celui de \functionname{f}, et donc l'objet doit être détruit lorsque nous achevons la fonction \functionname{f}. Après la fin de la fonction \functionname{f}, c'est l'environnement qui va automatiquement détruire toutes les variables locales à \functionname{f} en détruisant la StackFrame correspondante. Pour les objets à détruire qui ne sont pas de type primitif, c'est l'environnement qui appelle automatiquement les destructeurs des types correspondants.\\
 
 Nous reviendrons plus en détail dans les chapitres suivants quant à l'usage des destructeurs.\\
 
@@ -749,9 +749,13 @@ int A::b = a+1;
 int A::a = b+1;
 \end{lstlisting}\end{DDbox}
 
+\begin{habitudes}[Emploi de champs public static]
+D'une manière générale, les variables globales et les champs static public sont accessibles n'importe où dans le code, et leur durée de vie est celle du programme en entier. Ainsi, de même qu'il faut s'interdire d'utiliser des variables globales, il faut s'efforcer de ne pas employer de champs public static. A la différence des variables globales les champs static ont leur nom scopé par le type, c'est à dire que deux types \classname{A} et \classname{B} peuvent chacun avoir chacun un champ public static \varname{Value} par exemple, mais qu'il ne peut y avoir confusion entre les deux variables, puisque l'une a pour nom \varname{A::Value} tandis que l'autre est désignée par \varname{B::Value}. Cependant, tout comme pour les variables globales, les champs public static ont tendance à introduire des effets de bord peu intuitifs.\\
+\end{habitudes}
+
 \subsection{Méthodes statiques}
 
-Nous voudrions maintenant instancier un accumulator à la condition qu'il n'en existe pas déjà un. Pour faire ceci, nous voulons tout d'abord ajouter un compteur qui va dénombrer le nombre d'instances de la classe Accumulator qui ont été créées. Nous ajoutons donc un autre champ entier statique "accumulatorInstancesCreated" dans le fichier header, et l'initialisons dans le fichier Accumulator.cpp.\\
+Nous voudrions maintenant instancier un accumulator à la condition qu'il n'en existe pas déjà un. Pour faire ceci, nous voulons tout d'abord ajouter un compteur qui va dénombrer le nombre d'instances de la classe Accumulator qui ont été créées. Nous ajoutons donc un autre champ entier statique "accCreated" dans le fichier header, et l'initialisons dans le fichier Accumulator.cpp.\\
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}
@@ -766,7 +770,7 @@ private:
 	double _xSum;
 	double _xSquareSum;
 	static int nTotal;
-	static int accumulatorInstancesCreated;
+	static int accCreated;
 
 public:
 	Accumulator(int, double, double);
@@ -790,7 +794,7 @@ Accumulator::Accumulator(int nInit, double xSumInit, double xSquareInit)
 	_n = nInit;
 	_xSum = xSumInit;
 	_xSquareSum = xSquareInit;
-	accumulatorInstancesCreated++;
+	accCreated++;
 }
 
 Accumulator::Accumulator()
@@ -798,7 +802,7 @@ Accumulator::Accumulator()
 	_n = 0;
 	_xSum = 0;
 	_xSquareSum = 0;
-	accumulatorInstancesCreated++;
+	accCreated++;
 }
 
 Accumulator::~Accumulator(void)
@@ -824,12 +828,14 @@ int Accumulator::GetN(void)
 }
 
 int Accumulator::nTotal=0;
-int Accumulator::accumulatorInstancesCreated=0;
+int Accumulator::accCreated=0;
 \end{lstlisting}\end{DDbox}
 
 Comment maintenant tester si une instance a déjà été créée ? Puisque le champ static "accumulatorInstancesCreated" est privé, il est nécessaire de construire une méthode GetInstancesCount() renvoyant cette valeur. Cependant, si aucune instance n'a encore été créée, comment pourrions nous écrire instance.GetInstancesCount() ?\\
 
-Il est maintenant nécessaire d'ajouter un concept, celui de fonction statique. Une fonction est dite statique, si son comportement ne dépend pas de l'état interne de l'instance appelante, autrement dit, si son résultat et ses effets pourraient être appelés sur n'importe quelle instance de la classe avec à chaque fois le même effet. Puisqu'une telle fonction n'a pas besoin d'une instance spécifique pour être appelée, elle est dite statique et est attachée à la classe plutôt qu'à une instance spécifique.\\
+Il est maintenant nécessaire d'ajouter un concept, celui de fonction statique. Une fonction est dite statique, si son comportement ne dépend pas de l'état interne de l'instance appelante, autrement dit, si son résultat et ses effets pourraient être appelés sur n'importe quelle instance de la classe avec à chaque fois le même effet. En particulier, une fonction statique n'a pas accès aux champs non statiques de la classe, et ne peut pas appeler directement des méthodes non statiques de la classe.\\
+
+Puisqu'une telle fonction n'a pas besoin d'une instance spécifique pour être appelée, elle est dite statique et est attachée à la classe plutôt qu'à une instance spécifique.\\
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}
@@ -844,14 +850,14 @@ private:
 	double _xSum;
 	double _xSquareSum;
 	static int nTotal;
-	static int accumulatorInstancesCreated;
+	static int accCreated;
 
 public:
 	Accumulator(int, double, double);
 	Accumulator();
 	~Accumulator(void);
 	void Add(double);
-	static int GetInstancesCreatedCount(void); //new static method just created
+	static int GetAccCreatedCount(void); //new static method just created
 
 	double GetMean(void);
 	int GetN(void);
@@ -864,9 +870,9 @@ public:
 \begin{lstlisting}
 //In Accumulator.cpp :
 
-int Accumulator::GetInstancesCreatedCount(void)
+int Accumulator::GetAccCreatedCount(void)
 {
-	return accumulatorInstancesCreated;
+	return accCreated;
 }
 \end{lstlisting}\end{DDbox}
 
@@ -876,7 +882,7 @@ Les méthodes statiques publiques, tout comme les champs statiques publics, ne so
 \begin{lstlisting}
 void main()
 {
-    if (Accumulator::GetInstancesCreatedCount() >= 1)
+    if (Accumulator::GetAccCreatedCount() >= 1)
     {
         //.....
     }
@@ -886,7 +892,7 @@ void main()
 Remarque : une méthode statique n'a pas nécessairement besoin de champs statiques. C'est seulement une manière de signifier que son code est indépendant de l'instance appelante. Par exemple, nous pourrions concevoir une méthode statique Merge qui prendrait en argument deux instances de la classe Accumulator et qui en construirait une troisième. Cet exemple est laissé à titre d'exercice au lecteur.\\
 
 Note : Il est tout indiqué de déclarer les méthodes comme statiques dès que possible. Lorsque nous écrivons "du code mathématique", nos méthodes sont contenues dans des classes mais ne dépendent bien souvent
-d'aucun des champs de la classe. C'est le cas idéal pour utiliser des méthodes statiques.
+d'aucun des champs de la classe. C'est un cas idéal pour utiliser des méthodes statiques.
 %
 %Supposons que nous souhaitions \`a pr\'esent rajouter une m\'ethode qui apparie deux utilisateurs, plutôt que
 %de le faire directement comme précédemment. Nous pourrions rajouter une m\'ethode simple, de la forme suivante:
@@ -1068,4 +1074,54 @@ A::~A()
 
 \warning{Notez bien que le constructeur-copie prend son argument par référence (sinon il faudrait appeler le constructeur-copie avant de rentrer dans le constructeur-copie, et il faudrait appeler le constructeur-copie avant de rentrer dans le constructeur-copie pour rentrer dans le constructeur-copie, et ainsi de suite.)\\}
 
-Dans l'exemple ci-dessus, nous avons explicité le constructeur-copie pour répliquer parfaitement le comportement implicite donné par défaut à ce dernier par l'environnement. Nous rencontrerons dans la chapitre \ref{chap:memory1} des exemples de cas dans lesquels il est nécessaire de donner un sens plus spécifique à ce constructeur-copie.\\ 
+Dans l'exemple ci-dessus, nous avons explicité le constructeur-copie pour répliquer parfaitement le comportement implicite donné par défaut à ce dernier par l'environnement. Nous rencontrerons dans la chapitre \ref{chap:memory1} des exemples de cas dans lesquels il est nécessaire de donner un sens différent à ce constructeur-copie.\\ 
+
+\section{Fonctions membres const}
+
+Une fonction membre non statique peut également se voir attribuer le mot-clef const, comme dans le listing \ref{lst:fctConst1}.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption=Une fonction membre const, label=lst:fctConst1]
+
+class A
+{
+    public:
+        A(int value){_value = value;}
+        ~A();
+        void FooBar() const
+        {
+            //some code here
+        }
+        
+    private:
+        int _value;
+};
+
+\end{lstlisting}
+\end{DDbox}
+
+Le suffixe const apposé à une fonction membre signifie qu'il est interdit à cette fonction de modifier l'état interne de l'instance, c'est à dire d'avoir des effets de bord sur les champs de la classe\footnote{en dehors des champs spécifiquement marqué comme \classname{mutable}, mais celà dépasse le cadre que nous nous imposons dans ce cours}. Ainsi, le code du listing \ref{lst:fctConst2} ne peut être compilé sans échec.\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption=Une fonction membre const qui refuse de compiler, label=lst:fctConst2]
+
+class A
+{
+    public:
+        A(int value){_value = value;}
+        ~A();
+        void FooBar() const
+        {
+            _value = 2; // Compile-time error here
+        }
+
+    private:
+        int _value;
+};
+
+\end{lstlisting}
+\end{DDbox}
+
+A la différence des fonctions statiques, les fonctions membres const peuvent donc utiliser les champs de l'instance appelante, mais ces champs ne seront pas modifiés, tout comme dans le cas d'une fonction membre statique.\\
+
+Lorsqu'un argument est passé par référence constante dans une fonction, les seules fonctions membres qui peuvent être appelées sur cet objet passé en argument sont les fonctions membres const. De la même manière, les seules fonctions membres qui peuvent être appelées à l'intérieur d'une fonction membre const sont les fonctions membres const.\\ 
