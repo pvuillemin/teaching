@@ -13,9 +13,11 @@
 
 \section{Introduction}
 
-La surcharge d'opérateurs consiste à donner du sens à l'utilisation d'opérateurs comme \textbf{+, *, (),} etc. appliqués à des types non primitifs. Cette surcharge permet donc aux opérateurs du C++ d'avoir une signification particulière pour des types spécifiques.\\
+Les opérateurs sont une construction d'un langage qui se comporte sémantiquement comme les fonctions, mais qui disposent de libertés syntaxiques pour leur utilisation, et qui agissent sur un nombre fixe et limité d'arguments (en général un ou deux). Les opérateurs peuvent précéder leur argument (par exemple \varname{++} dans \varname{i++}), ils peuvent succéder à leur argument (par exemple \varname{*p} où \varname{p} est un pointeur), ou se retrouver entre leur deux arguments (par exemple \varname{+} dans \varname{a+b}). Parmi les opérateurs les plus connus du C++, nous pouvons citer : \varname{+}, \varname{-}, \varname{+=}, \varname{-=}, \varname{*}, \varname{*=}, \varname{/}, \varname{/=}, \varname{->}, \varname{()}, \varname{++}, \varname{--}, \varname{\%}, \varname{<}, \varname{>}, \varname{<=}, \varname{>=}, \varname{==}, \varname{!=}, \varname{<<}, \varname{>>}, \varname{!}, \varname{\&\&}, \varname{||}, \varname{?}, \varname{,}, \varname{\^}, \varname{\~}, etc.\\
 
-Dans le chapitre pr\'ec\'edent, nous avons \'ecrit un objet \classname{Accumulator}, qui permettait de collecter une grande quantit\'e de nombres pour en calculer des statistiques \'el\'ementaires. Nous souhaiterions maintenant pouvoir assembler ("merger" dans la langue de Shakespeare) deux instances de cette classe en une troisi\'eme instance, qui serait dans le même état que si elle avait résumé tous les nombres présentés aux deux premières instances. Dans ce but, nous pouvons écrire une fonction \functionname{Merge} :
+La surcharge d'opérateurs consiste à donner du sens à l'utilisation d'opérateurs comme \varname{+, *, (),} etc. appliqués à des types non primitifs. Cette surcharge permet donc aux opérateurs du C++ d'avoir une signification particulière pour des types spécifiques. Elle fait l'objet de ce chapitre.\\
+
+Dans le chapitre pr\'ec\'edent, nous avons \'ecrit un objet \classname{Accumulator}, qui permettait de collecter une grande quantit\'e de nombres pour en calculer des statistiques \'el\'ementaires. Nous souhaiterions maintenant pouvoir fusionner ("merger" dans la langue de Shakespeare) deux instances de cette classe en une troisi\'eme instance, qui serait dans le même état que si elle avait résumé tous les nombres présentés aux deux premières instances. Dans ce but, nous pouvons écrire une fonction \functionname{MergeWith} :
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}[caption = Accumulator.h]
@@ -83,7 +85,7 @@ void main()
 
 \end{lstlisting}\end{DDbox}
 
-Ce code a deux défauts mineurs. Tout d'abord, il pourrait être rendu plus compact. Plus gênant, il donne une impression d'assymétrie entre les instances \varname{acc1} et \varname{acc2}, qui ont pourtant des rôles parfaitement symétriques. Nous voudrions pouvoir remplacer cette syntaxe par quelquechose de la sorte :\\
+Ce code a deux défauts. Tout d'abord, il pourrait être rendu plus compact. Plus gênant, il donne une impression d'assymétrie entre les instances \varname{acc1} et \varname{acc2}, qui ont pourtant des rôles parfaitement symétriques. Nous voudrions pouvoir remplacer cette syntaxe par quelquechose de la sorte :\\
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}[caption = main.cpp]
@@ -105,7 +107,21 @@ void main()
 
 \end{lstlisting}\end{DDbox}
 
-Cette syntaxe est rendue possible en C++ par la surcharge de l'opérateur \textbf{+} pour la classe \classname{Accumulator}. Il faut appréhender en première approche les opérateurs comme des fonctions membres, c'est à dire des méthodes. Nous allons donc définir notre opérateur comme s'il s'agissait d'une fonction membre à part entière, en ajoutant seulement le mot clef "operator" :\\
+Cette syntaxe est rendue possible en C++ par la surcharge de l'opérateur \textbf{+} pour la classe \classname{Accumulator}. Il faut appréhender en première approche les opérateurs comme des fonctions membres pour lesquelles le compilateur consent à une entorse à la syntaxe d'appel des fonctions. Ainsi au lieu d'écrire :\\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = operateur +]
+ \varname{Accumulator sum = +(acc1,acc2);}
+\end{lstlisting}\end{DDbox}
+  
+nous écrivons : \\
+
+\begin{DDbox}{\linewidth}
+\begin{lstlisting}[caption = operateur +]
+ \varname{Accumulator sum = acc1 + acc2;}
+\end{lstlisting}\end{DDbox}
+
+Si la deuxième syntaxe nous semble plus agréable, c'est pour le compilateur sensiblement la même chose. Nous allons donc définir notre opérateur comme s'il s'agissait d'une fonction membre à part entière, en ajoutant seulement le mot clef "operator" :\\
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}[caption = Accumulator.h]
@@ -152,20 +168,20 @@ Accumulator Accumulator::operator+(const Accumulator& acc2)
 \end{lstlisting}\end{DDbox}
 
 \begin{habitudes}[Quand surcharger un opérateur ?]
-Pratiquement jamais. Il ne faut jamais surcharger un opérateur si le sens exact de l'opérateur n'est pas parfaitement limpide. Dans ce cas, il vaut mieux implémenter une fonction avec un nom suggestif. Dans la plupart des cas, implémenter un opérateur est une mauvaise idée, et vous devez vous abstenir de le faire sauf si c'est vraiment la solution évidente et indiscutable. Dès lors que le sens possible que pourrait avoir un opérateur soulève la plus petite ambigüité, ne l'implémentez-pas.
+Pratiquement jamais. Il ne faut jamais surcharger un opérateur si le sens exact de l'opérateur n'est pas parfaitement limpide. Dans le cas où l'évidence n'est pas établie, il vaut mieux implémenter une fonction avec un nom suggestif plutôt que recourir à un opérateur compact mais obscur. Implémenter un opérateur est donc une mauvaise idée dès lors que le sens possible que pourrait avoir un opérateur soulève la plus petite ambigüité.
 \end{habitudes}
 
 \begin{habitudes}[Ne pas implémenter un seul opérateur]
-Si après mûre réflexion, vous avez décidé d'implémenter un opérateur, implémenter les tous. Si $a$ et $b$ sont deux instances de type $T$, et que le type $T$ implémente un opérateur $+$, alors nous pouvons écrire $a+b$. Dans ce cas, l'utilisateur de la classe $T$ s'attend également à trouver l'opérateur $+=$. De la même manière, si l'opérateur "prefix increment" (non détaillé jusqu'à présent dans ce poly) $++a$ est implémenté, implémentez également l'opérateur "suffix increment" $a++$. Enfin, si vous surchargez l'opérateur $<$, surchargez également l'opérateur $>$.
+Les opérateurs ont souvent du sens par groupe. Si après mûre réflexion, vous avez décidé d'implémenter un opérateur, implémentez tous ceux du groupe correspondant. Si $a$ et $b$ sont deux instances de type $T$, et que le type $T$ implémente un opérateur $+$, alors nous pouvons écrire $a+b$. Dans ce cas, l'utilisateur de la classe $T$ s'attend également à trouver l'opérateur $+=$. De la même manière, si l'opérateur "prefix increment" (non détaillé jusqu'à présent dans ce poly) $++a$ est implémenté, implémentez également l'opérateur "suffix increment" $a++$. Enfin, si vous surchargez l'opérateur $<$, surchargez également l'opérateur $>$.
 \end{habitudes}
 
 \begin{habitudes}[Ne pas oublier qu'un opérateur "coûte"]
-En dépit de la compacité du code d'utilisation d'un opérateur, il ne faut pas oublier que du point de vue de la machine, un opérateur revient à appeler une méthode, et s'accompagne donc d'un certain coût. Ainsi, lorsque nous étudierons la classe vector, vous verrez que l'opérateur [] est bien plus coûteux que l'opérateur [] pour les tableaux natifs.
+En dépit de la compacité du code d'utilisation d'un opérateur, il ne faut pas oublier que du point de vue de la machine, un opérateur revient à appeler une méthode, et s'accompagne donc d'un certain coût. Ainsi l'opérateur [] de la classe \classname{vector} de la STL est bien plus coûteux que l'opérateur [] pour les tableaux simples.
 \end{habitudes}
 
 \section{Quelques exemples pertinents de surcharge d'opérateurs}
 
-Nous donnons pour illustrer notre propos quelques cas dans lesquels l'usage d'opérateurs est justifié. Comme nous n'avons pour l'instant pas découvert beaucoup de classes, ces exemples ne vous parleront pas pour le moment, mais vous pourrez y revenir en temps voulu.\\
+Nous donnons pour illustrer notre propos quelques cas dans lesquels l'usage d'opérateurs est justifié. La plupart de ces classes n'ayant pas encore été introduites, vous pourrez y revenir en temps voulu.\\
 
 \begin{itemize}
 \item Opérateur [] pour la classe vector
@@ -180,7 +196,7 @@ Nous donnons pour illustrer notre propos quelques cas dans lesquels l'usage d'op
 
 Dans ce paragraphe, nous donnons un autre exemple d'utilisation d'opérateurs, dans un cas archi-classique, celui d'un code mathématique, en l'occurence l'implémentation (partielle) d'une classe Complex.
 
-\warning{Il est fondamental en informatique de ne pas réinventer la roue. Probablement, le problème auquel vous devez faire face a déjà été rencontré et résolu par de nombreuses personnes avant vous. Outre le fait qu'elles sont probablement plus compétentes que vous, le code qu'elles ont produit a été éprouvé par le temps et l'usage, et il sera a priori moins sujet aux bugs que vous ne manquerez pas de rencontrer si vous optez pour une solution que vous développerez vous-même. En conséquence, \textbf{considérez toujours d'abord de réutiliser du code\footnote{Ce qui ne vous dédouane pas de le tester bien sûr, par exemple unitairement.} plutôt que d'en écrire.} Dans notre cas, il est évident qu'il ne faut jamais réimplémenter une classe Complex, nous en donnons juste une implémentation partielle à titre pédagogique.}
+\warning{Il est fondamental en informatique de ne pas réinventer la roue. Le problème auquel vous devez faire face a probablement déjà été rencontré et résolu par de nombreuses personnes avant vous. Outre le fait qu'elles sont probablement plus compétentes que vous, le code qu'elles ont produit a été éprouvé par le temps et l'usage, et il sera a priori moins sujet aux bugs que vous ne manquerez pas de rencontrer si vous optez pour une solution que vous développerez vous-même. En conséquence, \textbf{considérez toujours d'abord de réutiliser du code\footnote{Ce qui ne vous dédouane pas de le tester bien sûr, par exemple unitairement.} plutôt que d'en écrire.} Dans notre cas, il est évident qu'il ne faut jamais réimplémenter une classe Complex, nous en donnons juste une implémentation partielle à titre pédagogique.}
 
 Notez que certains opérateurs sont implémentés comme des fonctions membres, alors que d'autres non. Celà respecte les suggestions fournies dans le paragraphe \ref{section:InternAndExternOperators}.
 
@@ -301,7 +317,7 @@ void main()
 }
 \end{lstlisting}\end{DDbox}
 
-Pour empêcher cette utilisation (qui mène au complexe $1 + \frac{\pi}{2}i$), nous voudrions avoir un nom plus spécifique pour le consructeur que simplement "Complex", afin de lever cette ambiguïté. Pour ce faire, nous recourons au design dit du "Named Constructor".
+Pour empêcher cette utilisation (qui mène au complexe $1 + \frac{\pi}{2}i$), nous voudrions avoir un nom plus spécifique pour le constructeur que simplement "Complex", afin de lever cette ambiguïté. Pour ce faire, nous recourons au design dit du "Named Constructor".\\
 
 \begin{itemize}
 \item Tout d'abord, nous mettons les constructeurs de notre classe en private, afin de nous assurer qu'ils ne pourront plus être utilisés directement.
@@ -310,7 +326,7 @@ Pour empêcher cette utilisation (qui mène au complexe $1 + \frac{\pi}{2}i$), nou
 \end{itemize}
 
 \begin{DDbox}{\linewidth}
-\begin{lstlisting}[caption = Complex.h]
+\begin{lstlisting}[caption = Complex.h, label = lst:ComplexOperators]
 #ifndef COMPLEX_H
 #define COMPLEX_H
 
@@ -432,7 +448,7 @@ void main()
 
 \section{Surcharge de l'opérateur d'affectation}
 
-Lorsque nous écrivons le code du listing \ref{lst:affectation1}, nous utilisons l'implémentation de l'opérateur \textbf{=} pour les entiers. Cette implémentation spécifie qu'après la ligne "a=b;", a et b sont deux instances d'entiers, désignant chacune un entier distinct, mais qui possèdent la même valeur. Ainsi, nous aurions comme représentation sur la Stack quelquechose d'analogue au graphique \ref{fig:operator=Int}.\\
+Lorsque nous écrivons le code du listing \ref{lst:affectation1}, nous utilisons l'implémentation de l'opérateur \textbf{=} pour les entiers. Cette implémentation spécifie qu'après la ligne "a=b;", a et b sont deux instances d'entiers, désignant chacune un entier distinct, mais qui possèdent la même valeur. Ainsi, nous aurions comme représentation sur la Stack quelquechose d'analogue au graphique \ref{fig:operator=Int}. Ici, nous insistons sur le fait qu'\varname{a} et \varname{b} sont deux instances bien distinctes même si de même valeur, et qu'une affectation ultérieure de \varname{b} par exemple ne modifiera pas la valeur de \varname{a}.\\
 
 \begin{DDbox}{\linewidth}
 \begin{lstlisting}[caption = affectation d'un entier par un autre, label=lst:affectation1]
@@ -465,7 +481,7 @@ void main()
 }
 \end{lstlisting}\end{DDbox}
 
-Dans le listing \ref{lst:affectation2}, \varname{c1} et \varname{c2} sont deux instances de type Complex différentes, mais dont les champs \varname{\_real} et \varname{\_im} ont mêmes valeurs, \textit{i.e.} \varname{c1.\_real = c2.\_real} et \varname{c1.\_im = c2.\_im} après exécution de l'opérateur \textbf{=}. Cet état est également décrit par le graphique \ref{fig:operator=Complex}. Que ce soit dans le cas des entiers ou dans le cas des Complexs, il est très important de noter et de retenir\footnote{Car c'est un comportement très différent de celui dans des langages comme le C\# ou le Java par exemple.} que si nous écrivons à la suite de l'affectation \varname{b=a;} (resp. \varname{c1=c2;}) l'instruction :  \varname{a=1;} (resp. \varname{c1 = Complex::FromCartesian(1,1)}), les valeurs de \varname{b} et \varname{c2} restent inchangées.\\
+Dans le listing \ref{lst:affectation2}, \varname{c1} et \varname{c2} sont deux instances de type Complex différentes, mais dont les champs \varname{\_real} et \varname{\_im} ont mêmes valeurs, \textit{i.e.} \varname{c1.\_real = c2.\_real} et \varname{c1.\_im = c2.\_im} après exécution de l'opérateur \textbf{=}. Cet état est également décrit par le graphique \ref{fig:operator=Complex}. Comme pour le cas des entiers, il est très important de noter et de retenir\footnote{Car c'est un comportement très différent de celui de langages comme le C\# ou le Java par exemple.} que si nous écrivons à la suite de l'affectation \varname{c1=c2;} l'instruction : \varname{c1 = Complex::FromCartesian(1,1)}, la valeur de \varname{c2} reste inchangée.\\
 
 \begin{figure}[]
 	\begin{center}
@@ -496,14 +512,18 @@ Complex& Complex::operator=(const Complex& source)
 {
 	_real = source._real;
 	_im = source._im;
-    return *this; 
+    return *this;
 }
 \end{lstlisting}\end{DDbox}
 
 \section{Op\'erateurs internes, op\'erateurs externes}
 \label{section:InternAndExternOperators}
 
+Les opérateurs peuvent être implémentés comme des opérateurs membres : c'est le cas par exemple de l'opérateur \varname{+=} dans le listing \ref{lst:ComplexOperators} ou de l'opérateur \varname{=} dans le listing \ref{lst:affectation4}. Ils peuvent également être implémentés comme des opérateurs non membres, comme c'est le cas de l'opérateur \varname{+} dans le listing \ref{lst:ComplexOperators}.\\
 
+Certains opérateurs doivent nécessairement être implémentés comme des opérateurs membres. C'est le cas par exemple des opérateurs \varname{=} (opérateur d'\textit{assignment} ou d'affectation), de l'opérateur \varname{[]} (opérateur crochet ou \textit{array subscription}), de l'opérateur \varname{->} (opérateur d'accès), ou encore de l'opérateur \varname{()} (opérateur \textit{function call}). C'est une contrainte du langage.\\
+
+A l'inverse, certains opérateurs doivent nécessairement être implémentés comme des opérateurs non membres. Par exemple, lorsque nous voulons implémenter des opérateurs binaires dont l'opérande de gauche est une classe 
 
 \begin{recapitulatif}
 \item Il est possible de surcharger les op\'erateurs classiques, afin de permettre une manipulation plus ais\'ee \`a l'utilisateur de la classe.
