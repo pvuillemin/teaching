@@ -8,37 +8,34 @@
 
 Il n'était ni possible ni nécessaire d'aborder dans ce cours d'introduction de nombreux points essentiels pour les étudiants qui seraient intéressés par une carrière de développeur. Nombre de ces points seront abordés dans le cours avancé, dispensé en troisième année. Dans ce chapitre, je donne quelques références que le lecteur curieux pourra décrouvrir avec profit.\\
 
-\textit{Le C++ plus en détails}: Pour une introduction plus en détail et en précision du C++, je vous recommande l'ouvrage de Bruce Eckel : \textit{Thinking in C++} (\cite{Thinking}). Vous pouvez également lire l'ouvrage du père fondateur du langage (\cite{CppIntro}), mais que je trouve moins éclairant.\\
+\textit{Le C++ plus en détails}: Pour une introduction plus en détail et en précision du C++, je vous recommande l'ouvrage de Bruce Eckel : \textit{Thinking in C++} (\cite{Thinking}). Vous pouvez également lire l'ouvrage du père fondateur du langage (\cite{CppIntro}), mais que je trouve, à titre personnel, plus verbeux.\\
 
 \textit{Subtilités du C++}: L'ouvrage de Scott Meyers (\cite{EffCpp}) détaille de nombreux points techniques du C++, notamment de nombreux pièges du langage. C'est un ouvrage essentiel pour les gens désireux d'en acquérir une meilleure maîtrise.\\
 
 \textit{Design Pattern}: De nombreux problèmes de design se rencontrent régulièrement dans la conception de logiciel. Le livre du gang of four (\cite{DesignPatterns}) référence nombre de ces problèmes et en fournit des solutions élégantes et génériques.\\
 
-\textit{Sur la compilation}: Le dragon book (\cite{DragonBook}) introduit aux concepts de la compilation. Du fait de son âge, il n'aborde pas de nombreux concepts récents, notamment la compilation Just In Time ou la compilation continue, mais reste l'ouvrage de référence pour une introduction à ces techniques.\\
+\textit{Sur la compilation}: Le \textit{Dragon Book} (\cite{DragonBook}) introduit à la théorie de la compilation. Du fait de son âge, il n'aborde pas de nombreux concepts récents, notamment la compilation Just In Time ou la compilation continue, mais reste l'ouvrage de référence pour une introduction à ces techniques.\\
 
 \textit{Design Pattern en finance}: Si malgré tout, vous voulez coder des pricers, l'ouvrage de Marc Joshi (\cite{Joshi}) est une excellente introduction en la matière.\\
 
-\textit{Algorithmie}: L'algorithmie est un pan bien particulier du développement, qui est souvent utile aux ingénieurs. L'ouvrage de Cormen, Leiserson, Rivest et Stein (\cite{IntroAlgorithms}) fournit une introduction très abordable à cette discipline. Un peu plus théorique et technique, l'ouvrage de Korte et Vygen (\cite{CombinatorialOptimization}) décrit certains algorithmes plus avancés, notamment des algorithmes d'optimization sous contrainte convexe.\\
+\textit{Algorithmie}: L'algorithmie est un pan bien particulier du développement, qui est souvent utile aux ingénieurs. L'ouvrage de Cormen, Leiserson, Rivest et Stein (\cite{IntroAlgorithms}) fournit une introduction très abordable à cette discipline. Un peu plus théorique et technique, l'ouvrage de Korte et Vygen (\cite{CombinatorialOptimization}) décrit certains algorithmes plus avancés, notamment des algorithmes d'optimization sous contrainte convexe. Il est impensable de candidater dans des sociétés comme Google, Critéo ou Microsoft sans avoir bien assimilé \cite{IntroAlgorithms}.\\
 
-\textit{Programmation parallèle}: La programmation parallèle est un sujet majeur pour tous les ingénieurs qui seraient amenés à travailler sur des projets calculatoires. Bien que parfois un peu trop théorique pour notre propos, l'ouvrage de Shavit et Herlihy (\cite{AMP}) présente une excellente introduction aux concepts de la programmation parallèle, extrêmement plaisante à lire. Si la programmation multi-thread est extrêmement peu adaptée à un langage non garbage-collecté comme le C++ (\cite{ThreadsCannotBeImplementedAsALibrary}), vous pouvez quand même vous y essayer via Boost (\cite{Boost1} ou \cite{Boost2}). Plus à la mode, la programmation sur carte graphique (GPGPU) peut dans certains cas apporter de gros gains de performance. Le lecteur intéressé pourra découvrir à ce propos le livre de Sanders et Kandrot (\cite{CudaByExample}).\\
+\textit{Programmation parallèle}: La programmation parallèle est un sujet majeur pour tous les ingénieurs qui seraient amenés à travailler sur des projets calculatoires. Bien que parfois un peu trop théorique pour notre propos, l'ouvrage de Shavit et Herlihy (\cite{AMP}) présente une excellente introduction aux concepts de la programmation parallèle, extrêmement plaisante à lire. Si la programmation multi-thread est fort peu adaptée à un langage non garbage-collecté et sans modèle mémoire convenable\footnote{en dehors du C++11} comme le C++ (\cite{ThreadsCannotBeImplementedAsALibrary}), vous pouvez quand même vous y essayer via Boost (\cite{Boost1} ou \cite{Boost2}). Plus à la mode, la programmation sur carte graphique (GPGPU) peut dans certains cas apporter de gros gains de performance. Le lecteur intéressé pourra découvrir à ce propos le livre de Sanders et Kandrot (\cite{CudaByExample}).\\
 
-\textit{Gestion des caches et de la mémoire}: Dans son document phare (\cite{Drepper}), Ulrich Drepper présente une incursion très technique dans le domaine de la RAM et des caches.\\
+\textit{Gestion des caches et de la mémoire}: Dans son document qui fait date (\cite{Drepper}), Ulrich Drepper présente une incursion très technique dans le domaine de la RAM et des caches.\\
 
 \textit{Sur le métier de développeur}: Joel Spolsky, co-fondateur du site Stack Overflow, est aussi bien connu pour ses 2 ouvrages à propos du métier de développeur (\cite{JoelOnSoftware} et \cite{MoreJoel}).\\
 
 \textit{Si vous vous heurtez à des problèmes insolubles}: D'autres ont très probablement déjà eu ce problème, et vous trouverez toujours la solution sur Stack Overflow (\cite{StackOverflow}).\\
 
-\textit{Templates et Metaprogramming}: Le livre d'Alexandrescu (\cite{Alexandrescu}) est un ouvrage de référence à propos des templates et du design par "policy". Dans cet ouvrage, une courte introduction au Metaprogramming est également abordée. Le lecteur plus intéressé par ce sujet pourra lire avec profit l'ouvrage d'Abrahams et Gurtovoy (\cite{MetaProgramming}).\\
+\textit{Templates et Metaprogramming}: Le livre d'Alexandrescu (\cite{Alexandrescu}) est un ouvrage de référence à propos des templates et du design par "policy". Dans cet ouvrage, une courte introduction au Metaprogramming est également abordée. Le lecteur principalement intéressé par ce dernier sujet pourra lire avec profit l'ouvrage d'Abrahams et Gurtovoy (\cite{MetaProgramming}).\\
 
-\textit{Versionning de code}: Le versionning de code est indispensable pour tout projet informatique ou même pour la rédaction d'un document. Si l'ENSAE met à disposition de tous ses étudiants Ankh SVN qui est un client Subversion (\cite{Subversion}), beaucoup de projets informatiques récents préfèrent aujourd'hui Git (\cite{ProGit}).\\
+\textit{Versionning de code}: Le versionning de code est indispensable pour tout projet informatique ou même pour la rédaction d'un document. L'ENSAE met à disposition de tous ses étudiants Git et GitExtension, que vous pouvez redécouvrir par exemple dans \cite{ProGit}.\\
 
 \textit{L'intégration continue}: Est également une pratique indispensable dans une société logicielle. On peut en trouver une introduction par exemple dans \cite{ContinuousIntegration}.\\
 
+\textit{Tests Unitaires} Les tests unitaires permettent de garantir la non-régression au fur et à mesure de l'évolution d'un code, c'est à dire garantir que l'ajout de nouvelles fonctionnalités ou l'amélioration de certaines existantes ne va pas "casser" des fonctionnalités qui jusqu'à présent marchaient. Les tests unitaires sont un outil à la fois très élémentaire et très puissants. Il existe de nombreux frameworks de tests unitaires pour le C++. A vous d'en trouver un qui convienne à votre usage.\\
 
-
-Tests unitaires.
-
-Machine learning : 
 
 
 
