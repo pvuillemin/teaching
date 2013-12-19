@@ -85,6 +85,12 @@ B.~Korte and J.~Vygen.
 \newblock {\em Combinatorial Optimization: Theory and Algorithms}.
 \newblock Springer Publishing Company, Incorporated, 5th edition, 2012.
 
+\bibitem{Lippman}
+S.~Lippman.
+\newblock Why c++ supports both class and typename for type parameters.
+\newblock
+  \url{http://blogs.msdn.com/b/slippman/archive/2004/08/11/212768.aspx}.
+
 \bibitem{EffCpp}
 S.~Meyers.
 \newblock {\em Effective C++}.

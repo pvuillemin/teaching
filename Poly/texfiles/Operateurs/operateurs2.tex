@@ -519,12 +519,20 @@ Complex& Complex::operator=(const Complex& source)
 \section{Op\'erateurs internes, op\'erateurs externes}
 \label{section:InternAndExternOperators}
 
-Les opérateurs peuvent être implémentés comme des opérateurs membres : c'est le cas par exemple de l'opérateur \varname{+=} dans le listing \ref{lst:ComplexOperators} ou de l'opérateur \varname{=} dans le listing \ref{lst:affectation4}. Ils peuvent également être implémentés comme des opérateurs non membres, comme c'est le cas de l'opérateur \varname{+} dans le listing \ref{lst:ComplexOperators}.\\
+Un opérateur est dit membre s'il est défini au sein d'une classe : c'est le cas par exemple de l'opérateur \varname{+=} dans le listing \ref{lst:ComplexOperators} ou de l'opérateur \varname{=} dans le listing \ref{lst:affectation4}. Dans le cas contraire, il est dit non-membre : c'est par exemple le cas de l'opérateur \varname{+} dans le listing \ref{lst:ComplexOperators}.\\
 
 Certains opérateurs doivent nécessairement être implémentés comme des opérateurs membres. C'est le cas par exemple des opérateurs \varname{=} (opérateur d'\textit{assignment} ou d'affectation), de l'opérateur \varname{[]} (opérateur crochet ou \textit{array subscription}), de l'opérateur \varname{->} (opérateur d'accès), ou encore de l'opérateur \varname{()} (opérateur \textit{function call}). C'est une contrainte du langage.\\
 
-A l'inverse, certains opérateurs doivent nécessairement être implémentés comme des opérateurs non membres. Par exemple, lorsque nous voulons implémenter des opérateurs binaires dont l'opérande de gauche est une classe 
+A l'inverse, certains opérateurs doivent nécessairement être implémentés comme des opérateurs non membres. Par exemple, lorsque nous voulons implémenter des opérateurs binaires dont l'opérande de gauche est une classe dont nous ne possédons pas le code source : ainsi, si nous voulons donner du sens à \varname{cout << a} où \varname{a} est une instance de type \classname{A}, nous ne pouvons modifier le code de la classe \classname{std::ostream} dont \varname{cout} est une instance car ce code n'est pas disponible, et nous ne pouvons donc pas implémenter l'opérateur
+\functionname{<<} comme un opérateur membre de la classe \classname{std::ostream}.\\
 
+En ce qui concerne les opérateurs qui ne sont pas sujets aux contraintes sus-nommées, ils peuvent être définis ou bien comme des opérateurs membres, ou bien comme des opérateurs non-membres. Pour ces opérateurs, le meilleur design est sujet à débat, mais voici quelques recommendations qui peuvent vous aider à choisir entre les deux designs.\\
+
+\begin{enumerate}
+\item Préférer l'implémentation comme opérateur membre pour les opérateurs unaires (i.e. ceux qui ne prennent qu'un argument)
+\item Si un opérateur traite ses deux opérandes de manière équivalente, préférez l'implémentation comme opérateur non-membre
+\item Si un opérateur ne traite pas ses deux opératendes de manière équivalente (bien souvent dans ce cas, il modifie en profondeur l'opérande de gauche) et si il nécessite un accès aux propriétés privées de ce membre, préférez l'implémentation comme opérateur membre.\\  
+\end{enumerate}
 \begin{recapitulatif}
 \item Il est possible de surcharger les op\'erateurs classiques, afin de permettre une manipulation plus ais\'ee \`a l'utilisateur de la classe.
 \item Un op\'erateur est soit externe, soit interne.
