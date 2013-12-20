@@ -4,10 +4,10 @@ int main()
 {
    int n;
 
-   cout << "Veuillez entrer un nombre : ";
+   cout << "Please enter some number : ";
    cin >> n;
 
-   int tableau[n]; /*ERREUR*/
+   int someArray[n]; /*ERROR*/
 
    return 0;
 }

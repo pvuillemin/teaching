@@ -1,50 +1,50 @@
-#include "vecteur4.h"
+#include "vector4.h"
 
-Vecteur::Vecteur(unsigned int n) : dimension(n)
+Vector::Vector(unsigned int n) : _length(n)
 {
-	data = new double[n];
+	_data = new double[n];
 }
 
-Vecteur::~Vecteur()
+Vector::~Vector()
 {
-	delete[] data;
+	delete[] _data;
 }
 
-unsigned int Vecteur::getDimension()
+unsigned int Vector::GetLength()
 {
-	return dimension;
+	return _length;
 }
 
 
-Vecteur& Vecteur::operator=(const Vecteur &v)
+Vector& Vector::operator=(const Vector &v)
 {
 	if (&v ==  this)
 		return (*this);
 		
-	dimension = v.dimension;
-	if (data !=  0)
-		delete[] data;
+	_length = v._length;
+	if (_data !=  0)
+		delete[] _data;
 
-	data = new double [dimension];
-	for(int i = 0; i < dimension ; i++)
-		data[ i ] = v.data[ i ];
+	_data = new double [_length];
+	for(int i = 0; i < _length ; i++)
+		_data[ i ] = v._data[ i ];
 	
 	return (*this);	
 }
 
-Vecteur::Vecteur(const Vecteur &v)
+Vector::Vector(const Vector &v)
 {
-	dimension = v.dimension;
+	_length = v._length;
 	
-	if (data != 0)
-		delete[] data;
+	if (_data != 0)
+		delete[] _data;
 	
-	data = new double [dimension];
-	for(int i = 0; i < dimension ; i++)
-		data[ i ] = v.data[ i ];	
+	_data = new double [_length];
+	for(int i = 0; i < _length ; i++)
+		_data[ i ] = v._data[ i ];	
 }
 
-double & Vecteur::operator[](unsigned int i)
+double & Vector::operator[](unsigned int i)
 {
-	return data[ i ];
+	return _data[ i ];
 }

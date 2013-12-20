@@ -1,20 +1,20 @@
-class Vecteur
+class Vector
 {
 	public:
-		Vecteur(unsigned int n);
-		~Vecteur();
+		Vector(unsigned int n);
+		~Vector();
 
-		/*operateur d'egalite*/
-		Vecteur& operator=(const Vecteur &v);
-		/*constructeur de copie*/
-		Vecteur(const Vecteur &v);
+		/*assignment operator*/
+		Vector& operator=(const Vector &v);
+		/*Copy-Constructor*/
+		Vector(const Vector &v);
 
-		/*operateur pour acceder aux composantes*/
+		/*operateur []*/
 		double & operator[](unsigned int i);
 
-		unsigned int getDimension();
+		unsigned int GetLength();
 
 	private:
-		unsigned int dimension;
-		double *data;
+		unsigned int _length;
+		double* _data;
 };
